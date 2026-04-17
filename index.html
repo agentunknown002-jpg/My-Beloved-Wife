@@ -7,43 +7,27 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
         
-        /* LOGIN GATE */
-        #gate { 
-            position: fixed; inset: 0; z-index: 10000; 
-            background: radial-gradient(circle at center, #2b001a, #000);
-            display: flex; justify-content: center; align-items: center;
-        }
-        .btn { 
-            padding: 20px 50px; background: #ff1493; border: none; color: white; 
-            font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 0 30px #ff1493; -webkit-tap-highlight-color: transparent;
-        }
-
-        /* UNIVERSE */
-        #universe { display: none; width: 100%; height: 100vh; perspective: 1000px; background: #000; }
+        #universe { width: 100%; height: 100vh; perspective: 1200px; background: #000; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* THE CORE */
+        /* THE HEART CORE */
         .planet {
-            position: absolute; width: 150px; height: 150px; border-radius: 50%;
+            position: absolute; width: 140px; height: 140px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #ff85c1, #ff1493, #000);
             transform: translate(-50%, -50%); box-shadow: 0 0 80px #ff1493;
             display: flex; justify-content: center; align-items: center; z-index: 10;
         }
-        .planet::after { content: '❤️'; font-size: 4rem; }
+        .planet::after { content: '❤️'; font-size: 3.5rem; }
 
-        /* PHOTOS & PARTICLES */
-        .card { position: absolute; width: 80px; height: 80px; background: #fff; padding: 3px; border-radius: 4px; transform-style: preserve-3d; }
-        .card img { width: 100%; height: 100%; object-fit: cover; }
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.6; }
-        .love-text { position: absolute; color: #ff69b4; font-weight: bold; font-size: 1.2rem; white-space: nowrap; pointer-events: none; }
+        /* PHOTO CARDS - Always Facing Forward */
+        .card { position: absolute; width: 85px; height: 85px; background: #fff; padding: 3px; border-radius: 4px; transform-style: preserve-3d; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        
+        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.7; pointer-events: none; }
+        .love-text { position: absolute; color: #ff69b4; font-weight: bold; font-size: 1.3rem; white-space: nowrap; pointer-events: none; text-shadow: 0 0 10px #000; }
     </style>
 </head>
-<body>
-
-    <div id="gate">
-        <button class="btn" onclick="startApp()">ENTER UNIVERSE</button>
-    </div>
+<body onload="init()">
 
     <div id="universe">
         <div id="scene">
@@ -54,81 +38,74 @@
     <script>
         let ry = 0, rx = -10, isDragging = false, lastX, lastY;
 
-        function startApp() {
-            document.getElementById('gate').style.display = 'none';
-            document.getElementById('universe').style.display = 'block';
-            buildGalaxy();
-            animate();
-        }
-
-        function buildGalaxy() {
+        function init() {
             const scene = document.getElementById('scene');
             
-            // 1. Create 1000 Stars (Particles)
-            for(let i=0; i<1000; i++) {
+            // 1. Add 800 Stars (Particles)
+            for(let i=0; i<800; i++) {
                 let s = document.createElement('div');
                 s.className = 'star';
-                let r = 200 + Math.random() * 1000;
+                let r = 200 + Math.random() * 1200;
                 let phi = Math.random() * Math.PI * 2;
                 let theta = Math.random() * Math.PI;
-                let x = r * Math.sin(theta) * Math.cos(phi);
-                let y = r * Math.sin(theta) * Math.sin(phi);
-                let z = r * Math.cos(theta);
                 s.style.width = s.style.height = (Math.random()*3)+'px';
-                s.style.transform = translate3d(${x}px, ${y}px, ${z}px);
+                s.dataset.x = r * Math.sin(theta) * Math.cos(phi);
+                s.dataset.y = r * Math.sin(theta) * Math.sin(phi);
+                s.dataset.z = r * Math.cos(theta);
                 scene.appendChild(s);
             }
 
-            // 2. Create 172 Billboard Photos
+            // 2. Add 172 Billboard Photos (Facing Front)
             for(let i=1; i<=172; i++) {
                 let c = document.createElement('div');
                 c.className = 'card';
                 let phi = Math.acos(-1 + (2 * i) / 172);
                 let theta = Math.sqrt(172 * Math.PI) * phi;
-                let r = 400 + Math.random() * 100;c.dataset.x = r * Math.sin(phi) * Math.cos(theta);
+                let r = 450;
+                
+                c.dataset.x = r * Math.sin(phi) * Math.cos(theta);
                 c.dataset.y = r * Math.sin(phi) * Math.sin(theta);
                 c.dataset.z = r * Math.cos(phi);
                 
+                // Trying both filename formats automatically
                 c.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='1(${i}).jpg'; this.onerror=function(){this.parentElement.remove();}">;
                 scene.appendChild(c);
             }
 
-            // 3. Create English Love Text
-            const words = ["Love You", "Forever", "Always", "Beautiful"];
-            for(let i=0; i<20; i++) {
+            // 3. Add Love Text
+            const words = ["Love You", "Forever", "Always", "Queen"];
+            for(let i=0; i<15; i++) {
                 let t = document.createElement('div');
                 t.className = 'love-text';
                 t.innerText = words[i % words.length];
-                let r = 600;
-                let a = Math.random() * Math.PI * 2;
+                let r = 650;
+                let a = (i/15) * Math.PI * 2;
                 t.dataset.x = Math.cos(a) * r;
-                t.dataset.y = (Math.random() - 0.5) * 800;
+                t.dataset.y = (Math.random() - 0.5) * 600;
                 t.dataset.z = Math.sin(a) * r;
                 scene.appendChild(t);
             }
-        }
 
-        // --- Interaction Logic ---
+            animate();
+        }// --- Drag Controls ---
         window.addEventListener('touchstart', e => { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
         window.addEventListener('touchmove', e => {
             if(!isDragging) return;
-            let dx = e.touches[0].clientX - lastX;
-            let dy = e.touches[0].clientY - lastY;
-            ry += dx * 0.3; rx -= dy * 0.3;
+            ry += (e.touches[0].clientX - lastX) * 0.3;
+            rx -= (e.touches[0].clientY - lastY) * 0.3;
             lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
         });
         window.addEventListener('touchend', () => isDragging = false);
 
         function animate() {
-            if(!isDragging) ry += 0.1; // Auto-rotate
+            if(!isDragging) ry += 0.12; // Slow rotate
             
             document.getElementById('scene').style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
             
-            // BILLBOARDING: Make photos/text always face you
-            const items = document.querySelectorAll('.card, .love-text');
+            // BILLBOARDING ENGINE: This makes everything face her screen
+            const items = document.querySelectorAll('.card, .love-text, .star');
             items.forEach(item => {
                 let x = item.dataset.x, y = item.dataset.y, z = item.dataset.z;
-                // This formula counter-rotates the item so it always faces the camera
                 item.style.transform = translate3d(${x}px, ${y}px, ${z}px) rotateY(${-ry}deg) rotateX(${-rx}deg);
             });
 
