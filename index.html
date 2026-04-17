@@ -6,64 +6,59 @@
     <title>Universe</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; color: white; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; color: white; font-family: sans-serif; }
         
-        /* LOGIN SCREEN */
-        #login-screen {
-            position: fixed; inset: 0; background: radial-gradient(circle, #2b001a, #000);
-            display: flex; justify-content: center; align-items: center; z-index: 10000;
+        /* SIMPLE LOGIN */
+        #gate {
+            position: fixed; inset: 0; background: radial-gradient(circle, #33001b, #000);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
         }
-        .login-box {
-            background: rgba(255, 255, 255, 0.07); padding: 30px; border-radius: 25px;
-            backdrop-filter: blur(20px); border: 1px solid rgba(255, 105, 180, 0.3);
-            text-align: center; width: 280px;
+        #gate h1 { font-family: 'Pacifico', cursive; font-size: 2.5rem; margin-bottom: 20px; }
+        #gate button { 
+            padding: 15px 40px; border-radius: 50px; border: none; 
+            background: #ff1493; color: white; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; box-shadow: 0 0 20px #ff1493;
         }
-        h1 { font-family: 'Pacifico', cursive; margin: 0 0 20px 0; }
-        button { width: 100%; padding: 15px; border-radius: 30px; border: none; background: #ff1493; color: white; font-weight: bold; cursor: pointer; font-size: 20px; box-shadow: 0 0 20px #ff1493; }
 
-        /* GALAXY VIEW */
-        #universe { display: none; width: 100%; height: 100vh; perspective: 1000px; }
-        #camera { width: 100%; height: 100%; transform-style: preserve-3d; }
+        /* GALAXY SETUP */
+        #world { display: none; width: 100%; height: 100vh; perspective: 1000px; touch-action: none; }
+        #container { width: 100%; height: 100%; transform-style: preserve-3d; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* THE PLANET */
+        /* THE PRETTY PLANET */
         .planet {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 140px; height: 140px; border-radius: 50%;
+            position: absolute; width: 150px; height: 150px;
             background: radial-gradient(circle at 30% 30%, #ff69b4, #ff1493, #110005);
-            box-shadow: 0 0 60px #ff1493, inset -15px -15px 40px #000;
-            display: flex; justify-content: center; align-items: center; z-index: 5;
+            border-radius: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 50px #ff1493, inset -15px -15px 30px #000;
+            display: flex; justify-content: center; align-items: center;
         }
-        .planet::after { content: '❤️'; font-size: 3.5rem; }
+        .planet::after { content: '❤️'; font-size: 4rem; }
 
-        /* PHOTO CARDS */
+        /* THE CARDS */
         .card {
-            position: absolute; width: 75px; height: 75px;
-            background: #fff; border: 2px solid #fff; border-radius: 4px;
-            overflow: hidden; box-shadow: 0 0 15px rgba(255,255,255,0.3);
-            backface-visibility: hidden;
+            position: absolute; width: 80px; height: 80px;
+            background: #fff; border: 2px solid #fff; border-radius: 5px;
+            overflow: hidden; backface-visibility: hidden;
         }
         .card img { width: 100%; height: 100%; object-fit: cover; }
 
-        .love-text {
+        .txt {
             position: absolute; font-family: 'Pacifico', cursive; color: #fff;
-            white-space: nowrap; font-size: 1.6rem; text-shadow: 0 0 10px #ff1493;
+            white-space: nowrap; font-size: 1.5rem; text-shadow: 0 0 10px #ff1493;
         }
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; pointer-events: none; }
+        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.4; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h1>Universe</h1>
-            <p style="margin-bottom: 20px; font-size: 0.9rem;">Click below to enter</p>
-            <button onclick="start()">ENTER ORBIT</button>
-        </div>
+    <div id="gate">
+        <h1>Welcome</h1>
+        <button onclick="go()">ENTER ORBIT</button>
     </div>
 
-    <div id="universe">
-        <div id="camera">
+    <div id="world">
+        <div id="container">
             <div id="scene">
                 <div class="planet"></div>
             </div>
@@ -71,75 +66,76 @@
     </div>
 
     <script>
-        let zoom = 1, rX = -10, rY = 0, isMoving = false, px, py, dist = 0;
+        let zoom = 1, rx = -10, ry = 0, down = false, lx, ly, dStart = 0;
 
-        function start() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('universe').style.display = 'block';
+        function go() {
+            // Hide login, show world
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('world').style.display = 'block';
             
             const scene = document.getElementById('scene');
             
-            // 1. Create Stars
-            for(let i=0; i<200; i++) {
+            // 1. Stars
+            for(let i=0; i<150; i++) {
                 let s = document.createElement('div');
                 s.className = 'star';
+                let r = 300 + Math.random()*700;
+                let p = Math.random()*Math.PI*2, t = Math.random()*Math.PI;
                 s.style.width = s.style.height = Math.random()*3+'px';
-                let r = 200 + Math.random()*900;
-                let phi = Math.random()*Math.PI*2, theta = Math.random()*Math.PI;
-                s.style.transform = translate3d(${r*Math.sin(theta)*Math.cos(phi)}px, ${r*Math.sin(theta)*Math.sin(phi)}px, ${r*Math.cos(theta)}px);
+                s.style.transform = translate3d(${r*Math.sin(t)*Math.cos(p)}px, ${r*Math.sin(t)*Math.sin(p)}px, ${r*Math.cos(t)}px);
                 scene.appendChild(s);
-            }// 2. Create 172 Cards (Looks for "1 (1).jpg" in main folder)
+            }
+
+            // 2. 172 Cards
             for(let i=1; i<=172; i++) {
                 let c = document.createElement('div');
-                c.className = 'card';
-                let ang = (i/172)*Math.PI*2;
-                let rad = 400 + Math.random()*100;
+                c.className = 'card';let a = (i/172)*Math.PI*2;
+                let r = 400 + Math.random()*100;
                 let y = (Math.random()-0.5)*500;
-                c.style.transform = translate3d(${Math.cos(ang)*rad}px, ${y}px, ${Math.sin(ang)*rad}px) rotateY(${-ang}rad);
+                c.style.transform = translate3d(${Math.cos(a)*r}px, ${y}px, ${Math.sin(a)*r}px) rotateY(${-a}rad);
+                // LOOKING FOR "1 (1).jpg" etc
                 c.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'">;
                 scene.appendChild(c);
             }
 
-            // 3. Create 10 Text lines
-            for(let t=0; t<10; t++) {
-                let txt = document.createElement('div');
-                txt.className = 'love-text';
-                txt.innerText = "I love Kyal Sin Ko Ko";
-                let ang = (t/10)*Math.PI*2;
-                txt.style.transform = translate3d(${Math.cos(ang)*550}px, ${(t-5)*60}px, ${Math.sin(ang)*550}px) rotateY(${-ang}rad);
-                scene.appendChild(txt);
+            // 3. Texts
+            for(let j=0; j<10; j++) {
+                let t = document.createElement('div');
+                t.className = 'txt';
+                t.innerText = "I love Kyal Sin Ko Ko";
+                let a = (j/10)*Math.PI*2;
+                t.style.transform = translate3d(${Math.cos(a)*550}px, ${(j-5)*60}px, ${Math.sin(a)*550}px) rotateY(${-a}rad);
+                scene.appendChild(t);
             }
 
-            initControls();
-            loop();
-        }
-
-        function initControls() {
-            window.onmousedown = e => { isMoving = true; px = e.clientX; py = e.clientY; };
-            window.onmousemove = e => { if(isMoving) { rY += (e.clientX - px)*0.5; rX -= (e.clientY - py)*0.5; px = e.clientX; py = e.clientY; }};
-            window.onmouseup = () => isMoving = false;
+            // Controls
+            window.onmousedown = e => { down = true; lx = e.clientX; ly = e.clientY; };
+            window.onmousemove = e => { if(down) { ry += (e.clientX - lx)*0.5; rx -= (e.clientY - ly)*0.5; lx = e.clientX; ly = e.clientY; }};
+            window.onmouseup = () => down = false;
 
             window.ontouchstart = e => {
-                if(e.touches.length === 2) dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                else { isMoving = true; px = e.touches[0].clientX; py = e.touches[0].clientY; }
+                if(e.touches.length === 2) dStart = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                else { down = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; }
             };
             window.ontouchmove = e => {
                 if(e.touches.length === 2) {
                     let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                    zoom *= (d/dist); zoom = Math.max(0.2, 3); dist = d;
-                } else if(isMoving) {
-                    rY += (e.touches[0].clientX - px)*0.5; rX -= (e.touches[0].clientY - py)*0.5;
-                    px = e.touches[0].clientX; py = e.touches[0].clientY;
+                    zoom *= (d/dStart); zoom = Math.max(0.2, Math.min(zoom, 3)); dStart = d;
+                } else if(down) {
+                    ry += (e.touches[0].clientX - lx)*0.5; rx -= (e.touches[0].clientY - ly)*0.5;
+                    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
                 }
             };
-            window.ontouchend = () => isMoving = false;
+            window.ontouchend = () => down = false;
+
+            tick();
         }
 
-        function loop() {
-            if(!isMoving) rY += 0.1;
-            document.getElementById('scene').style.transform = rotateX(${rX}deg) rotateY(${rY}deg);
-            document.getElementById('camera').style.transform = scale(${zoom});
-            requestAnimationFrame(loop);
+        function tick() {
+            if(!down) ry += 0.1;
+            document.getElementById('scene').style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
+            document.getElementById('container').style.transform = scale(${zoom});
+            requestAnimationFrame(tick);
         }
     </script>
 </body>
