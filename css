@@ -1,0 +1,28 @@
+/* Initial state: Small and invisible */
+.zoom-out-initial {
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 2.5s ease-in-out, opacity 2s ease-in;
+}
+
+/* State after login: Zoomed in */
+.zoom-in-effect {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+}
+
+/* Orbiting Photo Styling */
+.orbit-photo {
+    position: absolute;
+    width: 50px; /* Smaller size to fit 172 images */
+    height: 50px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    overflow: hidden;
+    animation: orbit linear infinite;
+}
+
+@keyframes orbit {
+    from { transform: rotate(0deg) translateX(var(--distance)) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(var(--distance)) rotate(-360deg); }
+}
