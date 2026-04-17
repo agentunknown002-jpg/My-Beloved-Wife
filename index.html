@@ -2,110 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Universe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyal Sin Ko Ko | Universe</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Arial', sans-serif; }
         
-        /* THE BUTTON SCREEN */
+        /* LOGIN GATE */
         #gate { 
-            position: fixed; inset: 0; background: #000; 
-            display: flex; justify-content: center; align-items: center; z-index: 99999; 
+            position: fixed; inset: 0; z-index: 100; 
+            background: radial-gradient(circle, #2b001a 0%, #000 100%);
+            display: flex; justify-content: center; align-items: center; color: white;
+            transition: opacity 1s ease;
         }
-        
-        /* VERY SIMPLE BUTTON - NO FANCY CSS */
-        #start-btn { 
-            background: #ff1493; color: white; border: none; 
-            padding: 25px 50px; border-radius: 50px; 
-            font-size: 20px; font-weight: bold; 
-            box-shadow: 0 0 30px #ff1493;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+        .btn { 
+            padding: 22px 50px; background: #ff1493; border: none; color: white; 
+            font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 30px #ff1493; letter-spacing: 2px;
         }
-
-        /* THE UNIVERSE (HIDDEN AT START) */
-        #universe { display: none; width: 100%; height: 100vh; perspective: 1000px; }
-        #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
-
-        .planet {
-            position: absolute; width: 150px; height: 150px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ff85c1, #ff1493, #000);
-            transform: translate(-50%, -50%); box-shadow: 0 0 80px #ff1493;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .planet::after { content: '❤️'; font-size: 4rem; }
-
-        .card { position: absolute; width: 80px; height: 80px; background: #fff; border-radius: 4px; opacity: 0; transition: opacity 0.5s; }
-        .card img { width: 100%; height: 100%; object-fit: cover; }
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div id="gate">
-        <button id="start-btn" onclick="go()" ontouchstart="go()">ENTER ORBIT</button>
+        <button class="btn" onclick="init()">ENTER UNIVERSE</button>
     </div>
 
-    <div id="universe">
-        <div id="scene">
-            <div class="planet"></div>
-        </div>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
 
     <script>
-        var activated = false;
+        let scene, camera, renderer, controls;
 
-        function go() {
-            if (activated) return; // Prevent double clicks
-            activated = true;
+        function init() {
+            document.getElementById('gate').style.opacity = '0';
+            setTimeout(() => { document.getElementById('gate').style.display = 'none'; }, 1000);
 
-            // 1. Force Hide / Force Show
-            document.getElementById('gate').setAttribute('style', 'display:none !important');
-            document.getElementById('universe').style.display = 'block';
-            
-            startAnimation();
-        }
+            // 1. SCENE SETUP
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 20;
 
-        var ry = 0;
-        function startAnimation() {
-            var scene = document.getElementById('scene');
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
 
-            // Stars
-            for(var i=0; i<150; i++) {
-                var s = document.createElement('div');
-                s.className = 'star';
-                var r = 200 + Math.random()*800;
-                var p = Math.random()*Math.PI*2, t = Math.random()*Math.PI;
-                s.style.width = s.style.height = '2px';
-                s.style.transform = "translate3d(" + (r*Math.sin(t)*Math.cos(p)) + "px, " + (r*Math.sin(t)*Math.sin(p)) + "px, " + (r*Math.cos(t)) + "px)";
-                scene.appendChild(s);
+            // Smooth Controls (360 Drag & Zoom)
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.8;
+
+            // 2. THE CORE (Glowing Star)
+            const coreGeo = new THREE.SphereGeometry(2.5, 32, 32);
+            const coreMat = new THREE.MeshStandardMaterial({ 
+                color: 0xff1493, 
+                emissive: 0xff69b4, 
+                emissiveIntensity: 5 
+            });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            scene.add(core);
+
+            const pointLight = new THREE.PointLight(0xff69b4, 3, 60);
+            scene.add(pointLight);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+            // 3. ULTRA PARTICLES (10,000 STARS)
+            const starGeo = new THREE.BufferGeometry();
+            const starPos = [];
+            for(let i=0; i<10000; i++) {
+                const x = (Math.random() - 0.5) * 150;
+                const y = (Math.random() - 0.5) * 150;
+                const z = (Math.random() - 0.5) * 150;
+                starPos.push(x, y, z);
+            }
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.07, transparent: true, opacity: 0.8 });
+            const starCloud = new THREE.Points(starGeo, starMat);
+            scene.add(starCloud);
+
+            // 4. FLOATING 3D ENGLISH TEXT
+            const fontLoader = new THREE.FontLoader();
+            fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {const words = ["Love You", "Forever", "Always", "My Universe", "Queen"];
+                for(let i = 0; i < 40; i++) {
+                    const textGeo = new THREE.TextGeometry(words[Math.floor(Math.random() * words.length)], { 
+                        font: font, size: 0.5, height: 0.1 
+                    });
+                    const textMat = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 0.7 });
+                    const textMesh = new THREE.Mesh(textGeo, textMat);
+                    textMesh.position.set((Math.random()-0.5)*40, (Math.random()-0.5)*30, (Math.random()-0.5)*40);
+                    scene.add(textMesh);
+                }
+            });
+
+            // 5. 172 SPRITE PHOTOS (Always faces your screen)
+            const textureLoader = new THREE.TextureLoader();
+            for (let i = 1; i <= 172; i++) {
+                const tex = textureLoader.load(1 (${i}).jpg);
+                const spriteMat = new THREE.SpriteMaterial({ map: tex });
+                const sprite = new THREE.Sprite(spriteMat);
+                
+                // Sphere-shaped distribution
+                const phi = Math.acos(-1 + (2 * i) / 172);
+                const theta = Math.sqrt(172 * Math.PI) * phi;
+                const dist = 10 + Math.random() * 5;
+
+                sprite.position.set(
+                    dist * Math.cos(theta) * Math.sin(phi),
+                    dist * Math.sin(theta) * Math.sin(phi),
+                    dist * Math.cos(phi)
+                );
+                
+                sprite.scale.set(1.8, 1.8, 1); // Size of photos
+                scene.add(sprite);
             }
 
-            // Photos - Slow staggered loading to keep it from crashing
-            var count = 1;
-            function loadNext() {
-                if (count > 172) return;
-                var c = document.createElement('div');
-                c.className = 'card';
-                var a = (count / 172) * Math.PI * 2;
-                var r = 400;
-                var y = (Math.random() - 0.5) * 600;
-                c.style.transform = "translate3d(" + (Math.cos(a)*r) + "px," + y + "px," + (Math.sin(a)*r) + "px) rotateY(" + (-a) + "rad)";
-                c.innerHTML = '<img src="1 (' + count + ').jpg" onerror="this.parentElement.remove()">';scene.appendChild(c);
-                setTimeout(function() { c.style.opacity = 1; }, 50);
-                count++;
-                setTimeout(loadNext, 40);
-            }
-            loadNext();
-            
-            tick();
+            animate();
         }
 
-        function tick() {
-            ry += 0.15;
-            document.getElementById('scene').style.transform = "rotateY(" + ry + "deg) rotateX(-10deg)";
-            requestAnimationFrame(tick);
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Required for damping/auto-rotate
+            renderer.render(scene, camera);
         }
+
+        // Handle Screen Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
