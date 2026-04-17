@@ -2,29 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kyal Sin Ko Ko | Universe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Universe | Kyal Sin Ko Ko</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Arial', sans-serif; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
         
-        /* LOGIN GATE */
         #gate { 
-            position: fixed; inset: 0; z-index: 100; 
+            position: fixed; inset: 0; z-index: 1000; 
             background: radial-gradient(circle, #2b001a 0%, #000 100%);
-            display: flex; justify-content: center; align-items: center; color: white;
-            transition: opacity 1s ease;
+            display: flex; justify-content: center; align-items: center;
         }
+
         .btn { 
-            padding: 22px 50px; background: #ff1493; border: none; color: white; 
+            padding: 20px 50px; background: #ff1493; border: none; color: white; 
             font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer;
             box-shadow: 0 0 30px #ff1493; letter-spacing: 2px;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
 <body>
 
     <div id="gate">
-        <button class="btn" onclick="init()">ENTER UNIVERSE</button>
+        <button id="main-btn" class="btn">ENTER UNIVERSE</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -33,90 +33,84 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
 
     <script>
+        // 1. SAFELY BIND THE BUTTON IMMEDIATELY
+        const startBtn = document.getElementById('main-btn');
+        
+        startBtn.addEventListener('click', function() {
+            startBtn.innerText = "LOADING...";
+            init();
+        });
+
+        startBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevents double-firing on mobile
+            startBtn.innerText = "LOADING...";
+            init();
+        });
+
         let scene, camera, renderer, controls;
 
         function init() {
-            document.getElementById('gate').style.opacity = '0';
-            setTimeout(() => { document.getElementById('gate').style.display = 'none'; }, 1000);
+            // Remove the gate
+            document.getElementById('gate').style.display = 'none';
 
-            // 1. SCENE SETUP
+            // 2. SCENE SETUP
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 20;
+            camera.position.z = 25;
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Performance boost
             document.body.appendChild(renderer.domElement);
 
-            // Smooth Controls (360 Drag & Zoom)
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
             controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.8;
+            controls.autoRotateSpeed = 0.5;
 
-            // 2. THE CORE (Glowing Star)
-            const coreGeo = new THREE.SphereGeometry(2.5, 32, 32);
-            const coreMat = new THREE.MeshStandardMaterial({ 
-                color: 0xff1493, 
-                emissive: 0xff69b4, 
-                emissiveIntensity: 5 
-            });
-            const core = new THREE.Mesh(coreGeo, coreMat);
+            // 3. THE CORE
+            const core = new THREE.Mesh(
+                new THREE.SphereGeometry(2.5, 32, 32),
+                new THREE.MeshStandardMaterial({ color: 0xff1493, emissive: 0xff69b4, emissiveIntensity: 2.5 })
+            );
             scene.add(core);
+            scene.add(new THREE.PointLight(0xff69b4, 2, 60));
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-            const pointLight = new THREE.PointLight(0xff69b4, 3, 60);
-            scene.add(pointLight);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-            // 3. ULTRA PARTICLES (10,000 STARS)
+            // 4. 10,000 PARTICLES (STARS)
             const starGeo = new THREE.BufferGeometry();
             const starPos = [];
             for(let i=0; i<10000; i++) {
-                const x = (Math.random() - 0.5) * 150;
-                const y = (Math.random() - 0.5) * 150;
-                const z = (Math.random() - 0.5) * 150;
-                starPos.push(x, y, z);
+                starPos.push((Math.random()-0.5)*180, (Math.random()-0.5)*180, (Math.random()-0.5)*180);
             }
             starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.07, transparent: true, opacity: 0.8 });
-            const starCloud = new THREE.Points(starGeo, starMat);
-            scene.add(starCloud);
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08 });
+            scene.add(new THREE.Points(starGeo, starMat));
 
-            // 4. FLOATING 3D ENGLISH TEXT
-            const fontLoader = new THREE.FontLoader();
-            fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {const words = ["Love You", "Forever", "Always", "My Universe", "Queen"];
-                for(let i = 0; i < 40; i++) {
-                    const textGeo = new THREE.TextGeometry(words[Math.floor(Math.random() * words.length)], { 
-                        font: font, size: 0.5, height: 0.1 
-                    });
-                    const textMat = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 0.7 });
-                    const textMesh = new THREE.Mesh(textGeo, textMat);
-                    textMesh.position.set((Math.random()-0.5)*40, (Math.random()-0.5)*30, (Math.random()-0.5)*40);
-                    scene.add(textMesh);
+            // 5. ENGLISH TEXT
+            const fontLoader = new THREE.FontLoader();fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {
+                const words = ["Love You", "Forever", "Always", "Beautiful"];
+                for(let i = 0; i < 30; i++) {
+                    const tGeo = new THREE.TextGeometry(words[Math.floor(Math.random()*words.length)], { font: font, size: 0.5, height: 0.1 });
+                    const tMesh = new THREE.Mesh(tGeo, new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 0.6 }));
+                    tMesh.position.set((Math.random()-0.5)*50, (Math.random()-0.5)*40, (Math.random()-0.5)*50);
+                    scene.add(tMesh);
                 }
             });
 
-            // 5. 172 SPRITE PHOTOS (Always faces your screen)
-            const textureLoader = new THREE.TextureLoader();
+            // 6. 172 PHOTOS (BILLBOARDING - ALWAYS FACING YOU)
+            const texLoader = new THREE.TextureLoader();
             for (let i = 1; i <= 172; i++) {
-                const tex = textureLoader.load(1 (${i}).jpg);
-                const spriteMat = new THREE.SpriteMaterial({ map: tex });
-                const sprite = new THREE.Sprite(spriteMat);
+                const texture = texLoader.load(1 (${i}).jpg);
+                const material = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(material);
                 
-                // Sphere-shaped distribution
                 const phi = Math.acos(-1 + (2 * i) / 172);
                 const theta = Math.sqrt(172 * Math.PI) * phi;
-                const dist = 10 + Math.random() * 5;
+                const r = 12 + Math.random() * 6;
 
-                sprite.position.set(
-                    dist * Math.cos(theta) * Math.sin(phi),
-                    dist * Math.sin(theta) * Math.sin(phi),
-                    dist * Math.cos(phi)
-                );
-                
-                sprite.scale.set(1.8, 1.8, 1); // Size of photos
+                sprite.position.set(r*Math.cos(theta)*Math.sin(phi), r*Math.sin(theta)*Math.sin(phi), r*Math.cos(phi));
+                sprite.scale.set(2, 2, 1);
                 scene.add(sprite);
             }
 
@@ -125,11 +119,10 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Required for damping/auto-rotate
+            if(controls) controls.update();
             renderer.render(scene, camera);
         }
 
-        // Handle Screen Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
