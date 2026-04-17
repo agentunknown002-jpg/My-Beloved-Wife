@@ -3,58 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Universe for Kyal Sin Ko Ko</title>
+    <title>For Kyal Sin Ko Ko</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; color: white; font-family: sans-serif; }
         
-        /* LOGIN SCREEN - EXACT STYLE FROM YOUR SCREENSHOT */
+        /* LOGIN SCREEN */
         #login-screen {
             position: fixed; inset: 0; background: radial-gradient(circle, #2b001a, #000);
             display: flex; justify-content: center; align-items: center; z-index: 10000;
         }
         .login-box {
-            background: rgba(255, 255, 255, 0.07); padding: 35px; border-radius: 25px;
+            background: rgba(255, 255, 255, 0.07); padding: 30px; border-radius: 25px;
             backdrop-filter: blur(20px); border: 1px solid rgba(255, 105, 180, 0.3);
-            text-align: center; width: 280px; box-shadow: 0 0 50px rgba(255, 20, 147, 0.3);
+            text-align: center; width: 280px;
         }
-        h1 { font-family: 'Pacifico', cursive; font-size: 2rem; margin: 0 0 10px 0; }
-        p { font-size: 0.85rem; opacity: 0.8; margin-bottom: 25px; }
-        input { width: 90%; padding: 14px; border-radius: 25px; border: none; margin-bottom: 20px; text-align: center; font-size: 1rem; color: #000; outline: none; }
-        button { width: 100%; padding: 14px; border-radius: 25px; border: none; background: #ff1493; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        h1 { font-family: 'Pacifico', cursive; margin: 0 0 10px 0; }
+        input { width: 85%; padding: 12px; border-radius: 20px; border: none; margin-bottom: 20px; text-align: center; color: #000; font-size: 16px; }
+        button { width: 95%; padding: 12px; border-radius: 20px; border: none; background: #ff1493; color: white; font-weight: bold; cursor: pointer; font-size: 18px; }
 
-        /* THE GALAXY VIEW */
-        #universe-container { display: none; width: 100%; height: 100vh; perspective: 1000px; background: #000; }
-        #scaler { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        /* GALAXY VIEW */
+        #universe { display: none; width: 100%; height: 100vh; perspective: 1000px; }
+        #camera { width: 100%; height: 100%; transform-style: preserve-3d; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* PRETTY HEART PLANET */
+        /* THE PLANET (Alex Dev Style) */
         .planet {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 150px; height: 150px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ff69b4, #ff1493, #000);
-            box-shadow: 0 0 60px #ff1493, inset -20px -20px 50px rgba(0,0,0,0.8);
-            display: flex; justify-content: center; align-items: center; z-index: 10;
+            width: 140px; height: 140px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff69b4, #ff1493, #220011);
+            box-shadow: 0 0 50px #ff1493, inset -15px -15px 40px #000;
+            display: flex; justify-content: center; align-items: center; z-index: 5;
         }
-        .planet::after { content: '❤️'; font-size: 4rem; }
+        .planet::after { content: '❤️'; font-size: 3.5rem; filter: drop-shadow(0 0 10px #fff); }
 
-        /* PHOTO CARDS */
+        /* ELEMENTS */
         .card {
-            position: absolute; width: 80px; height: 80px;
-            background: #fff; border: 2px solid #fff; border-radius: 5px;
-            overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: absolute; width: 70px; height: 70px;
+            background: #fff; border: 2px solid #fff; border-radius: 4px;
+            overflow: hidden; box-shadow: 0 0 15px rgba(255,255,255,0.3);
             backface-visibility: hidden;
         }
         .card img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* FLOATING TEXT */
-        .love-msg {
+        .love-text {
             position: absolute; font-family: 'Pacifico', cursive; color: #fff;
-            white-space: nowrap; font-size: 1.6rem; pointer-events: none;
-            text-shadow: 0 0 15px #ff1493;
+            white-space: nowrap; font-size: 1.5rem; text-shadow: 0 0 10px #ff1493;
         }
-
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; pointer-events: none; }
+        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -63,122 +59,102 @@
         <div class="login-box">
             <h1>Welcome</h1>
             <p>Enter the name of the most beautiful woman</p>
-            <input type="text" id="nameInput" placeholder="Full Name..." autocomplete="off">
-            <button id="btn" onclick="openUniverse()">Enter Orbit</button>
+            <input type="text" id="nameInput" placeholder="Name..." autocomplete="off">
+            <button onclick="enterOrbit()">Enter Orbit</button>
         </div>
     </div>
 
-    <div id="universe-container">
-        <div id="scaler">
+    <div id="universe">
+        <div id="camera">
             <div id="scene">
                 <div class="planet"></div>
-                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let zoomLevel = 1;
-        let rotX = -10, rotY = 0;
-        let dragging = false, lastX, lastY, pinchStart = 0;function openUniverse() {
-            const inputVal = document.getElementById('nameInput').value.trim();
-            // Matching the exact name requirement
-            if (inputVal === "Kyal Sin Ko Ko") {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('universe-container').style.display = 'block';
-                buildGalaxy();
-            } else {
-                alert("Incorrect name. Please try again.");
-            }
-        }
+        let zoom = 1, rX = -10, rY = 0;
+        let isMoving = false, px, py, dist = 0;
 
-        function buildGalaxy() {
+        // 1. THE BUTTON FUNCTION
+        function enterOrbit() {
+            const name = document.getElementById('nameInput').value.trim();
+            if(name === "Kyal Sin Ko Ko") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('universe').style.display = 'block';
+                createGalaxy();
+                startLoop();
+            } else {
+                alert("Please check the name spelling!");
+            }
+        }// 2. GENERATE GALAXY (Only runs AFTER button is clicked)
+        function createGalaxy() {
             const scene = document.getElementById('scene');
             
-            // 1. Star Dust Particles
-            for (let i = 0; i < 300; i++) {
+            // Stars
+            for(let i=0; i<200; i++) {
                 let s = document.createElement('div');
                 s.className = 'star';
-                let r = 200 + Math.random() * 800;
-                let theta = Math.random() * Math.PI * 2;
-                let phi = Math.random() * Math.PI;
-                let sz = (Math.random() * 2 + 1) + 'px';
-                s.style.width = sz; s.style.height = sz;
-                s.style.transform = translate3d(${r*Math.sin(phi)*Math.cos(theta)}px, ${r*Math.sin(phi)*Math.sin(theta)}px, ${r*Math.cos(phi)}px);
+                s.style.width = s.style.height = Math.random()*3+'px';
+                let r = 200 + Math.random()*800;
+                let phi = Math.random()*Math.PI*2, theta = Math.random()*Math.PI;
+                s.style.transform = translate3d(${r*Math.sin(theta)*Math.cos(phi)}px, ${r*Math.sin(theta)*Math.sin(phi)}px, ${r*Math.cos(theta)}px);
                 scene.appendChild(s);
             }
 
-            // 2. 172 Images from your main GitHub folder
-            for (let i = 1; i <= 172; i++) {
-                let card = document.createElement('div');
-                card.className = 'card';
-                let angle = (i / 172) * Math.PI * 2;
-                let r = 400 + (Math.random() * 100);
-                let x = Math.cos(angle) * r;
-                let z = Math.sin(angle) * r;
-                let y = (Math.random() - 0.5) * 600;
-
-                card.style.transform = translate3d(${x}px, ${y}px, ${z}px) rotateY(${-angle}rad);
-                // Fixed path for 1 (1).jpg etc.
-                card.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'">;
-                scene.appendChild(card);
+            // 172 Images - Path Fixed for Root Folder
+            for(let i=1; i<=172; i++) {
+                let c = document.createElement('div');
+                c.className = 'card';
+                let ang = (i/172)*Math.PI*2;
+                let rad = 350 + Math.random()*150;
+                let y = (Math.random()-0.5)*500;
+                c.style.transform = translate3d(${Math.cos(ang)*rad}px, ${y}px, ${Math.sin(ang)*rad}px) rotateY(${-ang}rad);
+                c.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'">;
+                scene.appendChild(c);
             }
 
-            // 3. Multiple Text Lines
-            for (let j = 0; j < 15; j++) {
-                let t = document.createElement('div');
-                t.className = 'love-msg';
-                t.innerText = "I love Kyal Sin Ko Ko";
-                let angle = (j / 15) * Math.PI * 2;
-                let r = 550;
-                t.style.transform = translate3d(${Math.cos(angle)*r}px, ${(j-7.5)*60}px, ${Math.sin(angle)*r}px) rotateY(${-angle}rad);
-                scene.appendChild(t);
+            // Multiple Texts
+            for(let t=0; t<10; t++) {
+                let txt = document.createElement('div');
+                txt.className = 'love-text';
+                txt.innerText = "I love Kyal Sin Ko Ko";
+                let ang = (t/10)*Math.PI*2;
+                txt.style.transform = translate3d(${Math.cos(ang)*500}px, ${(t-5)*60}px, ${Math.sin(ang)*500}px) rotateY(${-ang}rad);
+                scene.appendChild(txt);
             }
-
             initControls();
-            loop();
         }
 
+        // 3. CONTROLS (Pinch to Zoom & Drag)
         function initControls() {
-            const start = (x, y) => { dragging = true; lastX = x; lastY = y; };
+            const start = (x, y) => { isMoving = true; px = x; py = y; };
             const move = (x, y) => {
-                if (!dragging) return;
-                rotY += (x - lastX) * 0.5;
-                rotX -= (y - lastY) * 0.5;
-                lastX = x; lastY = y;
+                if(!isMoving) return;
+                rY += (x - px) * 0.5; rX -= (y - py) * 0.5;
+                px = x; py = y;
             };
-
             window.onmousedown = e => start(e.clientX, e.clientY);
             window.onmousemove = e => move(e.clientX, e.clientY);
-            window.onmouseup = () => dragging = false;
-
+            window.onmouseup = () => isMoving = false;
             window.ontouchstart = e => {
-                if (e.touches.length === 2) {
-                    pinchStart = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                } else {
-                    start(e.touches[0].clientX, e.touches[0].clientY);
-                }
+                if(e.touches.length === 2) dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                else start(e.touches[0].clientX, e.touches[0].clientY);
             };
             window.ontouchmove = e => {
-                if (e.touches.length === 2) {
+                if(e.touches.length === 2) {
                     let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                    zoomLevel *= (d / pinchStart);
-                    zoomLevel = Math.max(0.2, Math.min(zoomLevel, 3));
-                    pinchStart = d;
-                } else {
-                    move(e.touches[0].clientX, e.touches[0].clientY);
-                }
+                    zoom *= (d/dist); zoom = Math.max(0.2, Math.min(zoom, 3)); dist = d;
+                } else move(e.touches[0].clientX, e.touches[0].clientY);
             };
-            window.ontouchend = () => dragging = false;window.onwheel = e => {
-                zoomLevel -= e.deltaY * 0.001;
-                zoomLevel = Math.max(0.2, Math.min(zoomLevel, 3));
-            };
+            window.ontouchend = () => isMoving = false;
         }
 
-        function loop() {
-            if (!dragging) rotY += 0.1; // Slow automatic rotation
-            document.getElementById('scene').style.transform = rotateX(${rotX}deg) rotateY(${rotY}deg);
-            document.getElementById('scaler').style.transform = scale(${zoomLevel});
-            requestAnimationFrame(loop);
+        function startLoop() {
+            if(!isMoving) rY += 0.1;
+            document.getElementById('scene').style.transform = rotateX(${rX}deg) rotateY(${rY}deg);
+            document.getElementById('camera').style.transform = scale(${zoom});
+            requestAnimationFrame(startLoop);
         }
     </script>
 </body>
