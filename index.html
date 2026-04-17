@@ -3,123 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Universe</title>
+    <title>Universe | Kyal Sin Ko Ko</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; }
-        #universe { width: 100%; height: 100vh; perspective: 1000px; background: radial-gradient(circle, #1a000d, #000); }
-        #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
-
-        /* PHOTO CARDS */
-        .card { 
-            position: absolute; width: 75px; height: 75px; background: white; 
-            padding: 2px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            display: block;
-        }
-        .card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        #universe { width: 100%; height: 100vh; perspective: 1200px; background: radial-gradient(circle at center, #2b0016 0%, #000 100%); }
         
-        /* STARS & CORE PARTICLES */
-        .star { position: absolute; background: white; border-radius: 50%; pointer-events: none; }
-        .core-star { position: absolute; background: #ff1493; border-radius: 50%; box-shadow: 0 0 10px #ff69b4; pointer-events: none; }
+        #zoom-layer { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; will-change: transform; }
+
+        /* CARDS - GPU Accelerated */
+        .card { 
+            position: absolute; width: 80px; height: 80px; background: white; 
+            padding: 2px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            will-change: transform; backface-visibility: hidden;
+        }
+        .card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; border-radius: 2px; }
+        
+        /* PARTICLES */
+        .star { position: absolute; background: #fff; border-radius: 50%; pointer-events: none; opacity: 0.6; }
+        .heart-star { position: absolute; background: #ff1493; border-radius: 50%; box-shadow: 0 0 10px #ff69b4; pointer-events: none; will-change: transform; }
+        
+        /* MESSAGE */
+        #msg { 
+            position: absolute; transform-style: preserve-3d; color: #ff69b4; 
+            text-align: center; font-weight: bold; font-size: 1.3rem; width: 320px;
+            text-shadow: 0 0 15px rgba(255, 20, 147, 0.8); pointer-events: none;
+            line-height: 1.4; will-change: transform;
+        }
     </style>
 </head>
-<body>
+<body onclick="playMusic()">
+
+    <audio id="bgMusic" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="universe">
-        <div id="scene">
+        <div id="zoom-layer">
+            <div id="scene">
+                <div id="msg">I love you more than anything<br>Kyal Sin Ko Ko</div>
             </div>
+        </div>
     </div>
 
     <script>
         var scene = document.getElementById('scene');
-        var ry = 0;
-        var rx = -10;
-        var isDragging = false;
-        var lastX, lastY;
+        var zoomLayer = document.getElementById('zoom-layer');
+        var ry = 0, rx = -10, zoom = 0;
+        var isDragging = false, lastX, lastY, lastDist = 0;
         var allItems = [];
 
-        // 1. CREATE CENTRAL PARTICLE CORE (Replacing the planet)
-        for (var c = 0; c < 150; c++) {
+        function playMusic() {
+            var audio = document.getElementById('bgMusic');
+            audio.play().catch(function(e) {});
+        }
+
+        // 1. HEART CORE (Equation: x=16sin³, y=-(13cos-5cos2-2cos3-cos4))
+        for (var i = 0; i < 220; i++) {
+            var t = (i / 220) * Math.PI * 2;
             var cs = document.createElement('div');
-            cs.className = 'core-star';
-            var cr = Math.random() * 40; // Small radius for core
-            var cp = Math.random() * 6.28;
-            var ct = Math.random() * 3.14;
-            var cx = cr * Math.sin(ct) * Math.cos(cp);
-            var cy = cr * Math.sin(ct) * Math.sin(cp);
-            var cz = cr * Math.cos(ct);
-            cs.style.width = cs.style.height = (Math.random() * 4 + 2) + 'px';
+            cs.className = 'heart-star';
+            var scale = 7; 
+            var cx = 16 * Math.pow(Math.sin(t), 3) * scale;
+            var cy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * scale;
+            var cz = (Math.random() - 0.5) * 30; 
+            cs.style.width = cs.style.height = (Math.random() * 3 + 2) + 'px';
             scene.appendChild(cs);
             allItems.push({ el: cs, x: cx, y: cy, z: cz });
         }
 
-        // 2. CREATE OUTER STARS
-        for (var i = 0; i < 300; i++) {
+        // 2. STARS & PHOTOS
+        for (var k = 0; k < 250; k++) {
             var s = document.createElement('div');
             s.className = 'star';
-            var r = 150 + Math.random() * 900;
-            var p = Math.random() * 6.28;
-            var t = Math.random() * 3.14;
-            var x = r * Math.sin(t) * Math.cos(p);
-            var y = r * Math.sin(t) * Math.sin(p);
-            var z = r * Math.cos(t);
+            var r = 300 + Math.random() * 1000;
+            var p = Math.random() * 6.28, th = Math.random() * 3.14;
+            var x = r * Math.sin(th) * Math.cos(p), y = r * Math.sin(th) * Math.sin(p), z = r * Math.cos(th);
             s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
             scene.appendChild(s);
             allItems.push({ el: s, x: x, y: y, z: z });
-        }
-
-        // 3. CREATE 172 PHOTOS (Random Spread)
-        for (var j = 1; j <= 172; j++) {
+        }for (var j = 1; j <= 172; j++) {
             var card = document.createElement('div');
             card.className = 'card';
-            var r2 = 300 + Math.random() * 500;
-            var p2 = Math.random() * 6.28;
-            var t2 = Math.random() * 3.14;
-            var x2 = r2 * Math.sin(t2) * Math.cos(p2);
-            var y2 = r2 * Math.sin(t2) * Math.sin(p2);
-            var z2 = r2 * Math.cos(t2);
-            
+            var r2 = 380 + Math.random() * 600;
+            var p2 = Math.random() * 6.28, th2 = Math.random() * 3.14;
+            var x2 = r2 * Math.sin(th2) * Math.cos(p2), y2 = r2 * Math.sin(th2) * Math.sin(p2), z2 = r2 * Math.cos(th2);
             card.innerHTML = '<img src="1 (' + j + ').jpg" onerror="this.src=\'1(' + j + ').jpg\';">';
             scene.appendChild(card);
             allItems.push({ el: card, x: x2, y: y2, z: z2 });
         }
 
-        // --- MOUSE & TOUCH CONTROLS ---
-        function startDrag(x, y) {
-            isDragging = true;
-            lastX = x;
-            lastY = y;
-        }
-        function moveDrag(x, y) {
-            if (!isDragging) return;
-            ry += (x - lastX) * 0.3;
-            rx -= (y - lastY) * 0.3;
-            lastX = x;
-            lastY = y;
-        }
-        function endDrag() { isDragging = false; }// Mouse Events
-        window.onmousedown = function(e) { startDrag(e.clientX, e.clientY); };
-        window.onmousemove = function(e) { moveDrag(e.clientX, e.clientY); };
-        window.onmouseup = endDrag;
+        // --- SMOOTH ZOOM & DRAG ---
+        window.onwheel = function(e) { zoom -= e.deltaY * 0.8; updateZoom(); };
 
-        // Touch Events (For Mobile)
-        window.ontouchstart = function(e) { startDrag(e.touches[0].clientX, e.touches[0].clientY); };
-        window.ontouchmove = function(e) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); };
-        window.ontouchend = endDrag;
+        window.ontouchstart = function(e) {
+            if (e.touches.length === 2) {
+                lastDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+            } else {
+                isDragging = true;
+                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+            }
+        };
 
-        // --- ANIMATION LOOP ---
+        window.ontouchmove = function(e) {
+            if (e.touches.length === 2) {
+                var dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                zoom += (dist - lastDist) * 2.5;
+                lastDist = dist;
+                updateZoom();
+            } else if (isDragging) {
+                ry += (e.touches[0].clientX - lastX) * 0.35;
+                rx -= (e.touches[0].clientY - lastY) * 0.35;
+                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+            }
+        };
+
+        window.onmousedown = function(e) { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmousemove = function(e) { 
+            if (isDragging) {
+                ry += (e.clientX - lastX) * 0.35;
+                rx -= (e.clientY - lastY) * 0.35;
+                lastX = e.clientX; lastY = e.clientY;
+            }
+        };
+        window.onmouseup = window.ontouchend = function() { isDragging = false; };
+
+        function updateZoom() {
+            zoom = Math.max(-600, Math.min(900, zoom)); 
+            zoomLayer.style.transform = 'translateZ(' + zoom + 'px)';
+        }
+
         function animate() {
-            if (!isDragging) { ry += 0.15; } // Automatic slow spin
+            if (!isDragging) ry += 0.12; 
             
+            // Apply rotation with a smooth template literal
             scene.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
             
-            for (var k = 0; k < allItems.length; k++) {
-                var item = allItems[k];
-                // BILLBOARDING: translate and counter-rotate
-                item.el.style.transform = 'translate3d(' + item.x + 'px,' + item.y + 'px,' + item.z + 'px) rotateY(' + (-ry) + 'deg) rotateX(' + (-rx) + 'deg)';
+            var invRy = -ry;
+            var invRx = -rx;
+
+            for (var n = 0; n < allItems.length; n++) {
+                var it = allItems[n];
+                // Billboarding with GPU acceleration
+                it.el.style.transform = 'translate3d('+it.x+'px,'+it.y+'px,'+it.z+'px) rotateY('+invRy+'deg) rotateX('+invRx+'deg)';
             }
+            
+            document.getElementById('msg').style.transform = 'translate(-50%, -50%) rotateY('+invRy+'deg) rotateX('+invRx+'deg)';
+            
             window.requestAnimationFrame(animate);
         }
-
         animate();
     </script>
 </body>
