@@ -6,29 +6,32 @@
     <title>Universe | Kyal Sin Ko Ko</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
-        #universe { width: 100%; height: 100vh; perspective: 1000px; background: radial-gradient(circle at center, #1a000d 0%, #000 100%); }
+        #universe { width: 100%; height: 100vh; perspective: 1200px; background: radial-gradient(circle at center, #1a000d 0%, #000 100%); }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* THE SPHERE PLANET */
+        /* HIGH-QUALITY SPHERE PLANET */
         .planet {
-            position: absolute; width: 140px; height: 140px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ff85c1, #ff1493 40%, #4d0026 80%, #000 100%);
+            position: absolute; width: 130px; height: 130px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #ffb3d9, #ff1493 45%, #660022 85%, #000 100%);
             transform: translate(-50%, -50%); 
-            box-shadow: 0 0 70px rgba(255, 20, 147, 0.6), inset -10px -10px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 0 80px rgba(255, 20, 147, 0.7), inset -15px -15px 40px rgba(0,0,0,0.9);
             display: flex; justify-content: center; align-items: center; z-index: 10;
+            animation: pulse 3s infinite ease-in-out;
         }
-        .planet::after { content: '❤️'; font-size: 3.5rem; filter: drop-shadow(0 0 10px white); }
+        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.05); } }
+        .planet::after { content: '❤️'; font-size: 3rem; filter: drop-shadow(0 0 10px white); }
 
-        /* SPREAD OUT PHOTOS */
+        /* PHOTO CARDS */
         .card { 
-            position: absolute; width: 80px; height: 80px; background: #fff; 
-            padding: 3px; border-radius: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            backface-visibility: hidden;
+            position: absolute; width: 85px; height: 85px; background: #fff; 
+            padding: 3px; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
         }
         .card img { width: 100%; height: 100%; object-fit: cover; border-radius: 2px; }
         
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.6; pointer-events: none; }
-        .love-text { position: absolute; color: #ff69b4; font-weight: bold; font-size: 1.2rem; white-space: nowrap; pointer-events: none; text-shadow: 0 0 15px rgba(255, 20, 147, 0.8); }
+        /* PARTICLES */
+        .star { position: absolute; background: #fff; border-radius: 50%; pointer-events: none; }
+        .love-text { position: absolute; color: #ff69b4; font-weight: bold; font-size: 1.2rem; white-space: nowrap; pointer-events: none; text-shadow: 0 0 15px #ff1493; }
     </style>
 </head>
 <body onload="init()">
@@ -41,55 +44,70 @@
 
     <script>
         let ry = 0, rx = -10, isDragging = false, lastX, lastY;
+        const scene = document.getElementById('scene');
 
         function init() {
-            const scene = document.getElementById('scene');
-            
-            // 1. Spread 500 Stars Randomly
-            for(let i=0; i<500; i++) {
-                let s = document.createElement('div');
+            // 1. Generate Stars (Particles)
+            for(let i=0; i<400; i++) {
+                const s = document.createElement('div');
                 s.className = 'star';
-                let r = 200 + Math.random() * 1200;
-                let phi = Math.random() * 6.28;
-                let theta = Math.random() * 3.14;
-                s.style.width = s.style.height = (Math.random()*3 + 1) + 'px';
-                s.dataset.x = r * Math.sin(theta) * Math.cos(phi);
-                s.dataset.y = r * Math.sin(theta) * Math.sin(phi);
-                s.dataset.z = r * Math.cos(theta);
+                const r = 250 + Math.random() * 1100;
+                const phi = Math.random() * 6.28;
+                const theta = Math.random() * 3.14;
+                
+                const x = r * Math.sin(theta) * Math.cos(phi);
+                const y = r * Math.sin(theta) * Math.sin(phi);
+                const z = r * Math.cos(theta);
+                
+                s.style.width = s.style.height = (Math.random() * 3 + 1) + 'px';
+                s.style.opacity = Math.random();
+                
+                // Store coordinates directly
+                s.setAttribute('data-x', x);
+                s.setAttribute('data-y', y);
+                s.setAttribute('data-z', z);
                 scene.appendChild(s);
             }
 
-            // 2. Spread 172 Photos Randomly (No Spiral)
+            // 2. Generate 172 Photos (Randomly spread)
             for(let i=1; i<=172; i++) {
-                let c = document.createElement('div');
+                const c = document.createElement('div');
                 c.className = 'card';
                 
-                // Random Spherical Distribution
-                let r = 350 + Math.random() * 400; // Random distance between 350 and 750
-                let phi = Math.random() * 6.28;    // Random angle around
-                let theta = Math.random() * 3.14;  // Random angle up/down
+                const r = 400 + Math.random() * 500; 
+                const phi = Math.random() * 6.28;
+                const theta = Math.random() * 3.14;
                 
-                c.dataset.x = r * Math.sin(theta) * Math.cos(phi);
-                c.dataset.y = r * Math.sin(theta) * Math.sin(phi);
-                c.dataset.z = r * Math.cos(theta);
+                const x = r * Math.sin(theta) * Math.cos(phi);
+                const y = r * Math.sin(theta) * Math.sin(phi);const z = r * Math.cos(theta);
                 
-                let img = document.createElement('img');
+                c.setAttribute('data-x', x);
+                c.setAttribute('data-y', y);
+                c.setAttribute('data-z', z);
+                
+                const img = document.createElement('img');
                 img.src = 1 (${i}).jpg;
-                img.onerror = function() { this.src = 1(${i}).jpg; this.onerror = function() { this.parentElement.remove(); } };
+                img.onerror = function() { 
+                    this.src = 1(${i}).jpg; 
+                    this.onerror = function() { this.parentElement.remove(); };
+                };
                 
                 c.appendChild(img);
                 scene.appendChild(c);
-            }// 3. Floating Text
+            }
+
+            // 3. Floating English Text
             const words = ["Love You", "Forever", "Always", "Queen", "Beautiful"];
-            for(let i=0; i<20; i++) {
-                let t = document.createElement('div');
+            for(let i=0; i<15; i++) {
+                const t = document.createElement('div');
                 t.className = 'love-text';
                 t.innerText = words[i % 5];
-                let r = 500 + Math.random() * 300;
-                let p = Math.random() * 6.28, th = Math.random() * 3.14;
-                t.dataset.x = r * Math.sin(th) * Math.cos(p);
-                t.dataset.y = r * Math.sin(th) * Math.sin(p);
-                t.dataset.z = r * Math.cos(th);
+                const r = 600 + Math.random() * 200;
+                const p = Math.random() * 6.28, th = Math.random() * 3.14;
+                
+                t.setAttribute('data-x', r * Math.sin(th) * Math.cos(p));
+                t.setAttribute('data-y', r * Math.sin(th) * Math.sin(p));
+                t.setAttribute('data-z', r * Math.cos(th));
                 scene.appendChild(t);
             }
 
@@ -107,14 +125,17 @@
         window.addEventListener('touchend', () => isDragging = false);
 
         function animate() {
-            if(!isDragging) ry += 0.15; // Slow ambient rotation
+            if(!isDragging) ry += 0.15; 
             
-            document.getElementById('scene').style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
+            scene.style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
             
-            // Billboarding: Everything faces the camera
+            // Forces all items to calculate position and face user
             const items = document.querySelectorAll('.card, .love-text, .star');
             items.forEach(item => {
-                let x = item.dataset.x, y = item.dataset.y, z = item.dataset.z;
+                const x = item.getAttribute('data-x');
+                const y = item.getAttribute('data-y');
+                const z = item.getAttribute('data-z');
+                // The -rx and -ry in the rotation counteracts the scene rotation
                 item.style.transform = translate3d(${x}px, ${y}px, ${z}px) rotateY(${-ry}deg) rotateX(${-rx}deg);
             });
 
