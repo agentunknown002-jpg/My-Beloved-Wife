@@ -3,69 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kyal Sin Ko Ko Universe</title>
+    <title>Universe</title>
     <script>
-        function enterOrbit() {
-            // Force the login to disappear
-            document.getElementById('login-screen').style.setProperty('display', 'none', 'important');
-            document.getElementById('universe-view').style.display = 'block';
-            
-            // Build the galaxy
-            startGalaxy();
+        function go() {
+            console.log("Button Clicked");
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('universe').style.display = 'block';
+            start();
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; color: white; font-family: sans-serif; }
         
-        #login-screen {
+        #login {
             position: fixed; inset: 0; background: radial-gradient(circle, #2b001a, #000);
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;
         }
-        .login-box {
-            background: rgba(255, 255, 255, 0.07); padding: 40px; border-radius: 30px;
-            backdrop-filter: blur(20px); border: 1px solid rgba(255, 105, 180, 0.3);
-            text-align: center; width: 280px;
-        }
-        h1 { font-family: 'Pacifico', cursive; font-size: 2.5rem; margin: 0 0 20px 0; }
+        .box { background: rgba(255, 255, 255, 0.07); padding: 40px; border-radius: 30px; backdrop-filter: blur(20px); border: 1px solid rgba(255, 105, 180, 0.3); text-align: center; width: 280px; }
+        h1 { font-family: 'Pacifico', cursive; font-size: 2.5rem; margin-bottom: 20px; }
         
-        /* THE BUTTON */
-        #go-btn { 
-            width: 100%; padding: 18px; border-radius: 40px; border: none; 
-            background: #ff1493; color: white; font-size: 1.3rem; font-weight: bold;
-            cursor: pointer; box-shadow: 0 0 30px rgba(255, 20, 147, 0.6);
-            -webkit-tap-highlight-color: transparent;
+        /* THE "UNBREAKABLE" BUTTON */
+        #btn { 
+            width: 100%; padding: 20px; border-radius: 50px; border: none; 
+            background: #ff1493; color: white; font-size: 1.5rem; font-weight: bold;
+            cursor: pointer; box-shadow: 0 0 30px #ff1493;
         }
 
-        #universe-view { display: none; width: 100%; height: 100vh; perspective: 1200px; touch-action: none; }
+        #universe { display: none; width: 100%; height: 100vh; perspective: 1000px; touch-action: none; }
         #scaler { width: 100%; height: 100%; transform-style: preserve-3d; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
+        /* THE PLANET */
         .planet {
-            position: absolute; width: 160px; height: 160px; border-radius: 50%;
+            position: absolute; width: 150px; height: 150px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #ff69b4, #ff1493, #000);
-            transform: translate(-50%, -50%); box-shadow: 0 0 60px #ff1493, inset -20px -20px 40px #000;
+            transform: translate(-50%, -50%); box-shadow: 0 0 60px #ff1493;
             display: flex; justify-content: center; align-items: center; z-index: 10;
         }
         .planet::after { content: '❤️'; font-size: 4rem; }
 
+        /* CARDS */
         .card { position: absolute; width: 80px; height: 80px; background: #fff; border: 2px solid #fff; border-radius: 5px; overflow: hidden; backface-visibility: hidden; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .love-text { position: absolute; font-family: 'Pacifico', cursive; color: #fff; white-space: nowrap; font-size: 1.6rem; text-shadow: 0 0 15px #ff1493; }
+        .txt { position: absolute; font-family: 'Pacifico', cursive; color: #fff; white-space: nowrap; font-size: 1.6rem; text-shadow: 0 0 15px #ff1493; }
         .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h1>Universe</h1>
-            <p style="margin-bottom: 30px; opacity: 0.8;">Click below to start</p>
-            <button id="go-btn" onclick="enterOrbit()">ENTER ORBIT</button>
+    <div id="login">
+        <div class="box">
+            <h1>Welcome</h1>
+            <p style="margin-bottom: 20px;">Click the button below</p>
+            <button id="btn" onclick="go()">ENTER ORBIT</button>
         </div>
     </div>
 
-    <div id="universe-view">
+    <div id="universe">
         <div id="scaler">
             <div id="scene">
                 <div class="planet"></div>
@@ -74,72 +69,65 @@
     </div>
 
     <script>
-        let zoom = 1, rX = -10, rY = 0, isDown = false, lastX, lastY, pDist = 0;
+        let z = 1, rx = -10, ry = 0, isD = false, lx, ly, pD = 0;
 
-        function startGalaxy() {
-            const scene = document.getElementById('scene');
-            
-            // 1. Stars
-            for(let i=0; i<200; i++) {
-                let s = document.createElement('div');s.className = 'star';
+        function start() {
+            const sc = document.getElementById('scene');
+            // Stars
+            for(let i=0; i<150; i++) {
+                let s = document.createElement('div');
+                s.className = 'star';
                 let r = 250 + Math.random()*800;
-                let phi = Math.random()*Math.PI*2, theta = Math.random()*Math.PI;
+                let ph = Math.random()*Math.PI*2, th = Math.random()*Math.PI;
                 s.style.width = s.style.height = Math.random()*3+'px';
-                s.style.transform = translate3d(${r*Math.sin(theta)*Math.cos(phi)}px, ${r*Math.sin(theta)*Math.sin(phi)}px, ${r*Math.cos(theta)}px);
-                scene.appendChild(s);
+                s.style.transform = translate3d(${r*Math.sin(th)*Math.cos(ph)}px, ${r*Math.sin(th)*Math.sin(ph)}px, ${r*Math.cos(th)}px);sc.appendChild(s);
             }
-
-            // 2. 172 Cards (Looking for 1 (1).jpg in root)
+            // 172 Cards
             for(let i=1; i<=172; i++) {
                 let c = document.createElement('div');
                 c.className = 'card';
                 let a = (i/172)*Math.PI*2;
-                let r = 380 + Math.random()*120;
-                let y = (Math.random()-0.5)*600;
+                let r = 400;
+                let y = (Math.random()-0.5)*500;
                 c.style.transform = translate3d(${Math.cos(a)*r}px, ${y}px, ${Math.sin(a)*r}px) rotateY(${-a}rad);
                 c.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'">;
-                scene.appendChild(c);
+                sc.appendChild(c);
             }
-
-            // 3. Floating Text
-            for(let t=0; t<12; t++) {
-                let txt = document.createElement('div');
-                txt.className = 'love-text';
-                txt.innerText = "I love Kyal Sin Ko Ko";
-                let a = (t/12)*Math.PI*2;
-                txt.style.transform = translate3d(${Math.cos(a)*550}px, ${(t-6)*60}px, ${Math.sin(a)*550}px) rotateY(${-a}rad);
-                scene.appendChild(txt);
+            // Love Text
+            for(let t=0; t<8; t++) {
+                let x = document.createElement('div');
+                x.className = 'txt';
+                x.innerText = "I love Kyal Sin Ko Ko";
+                let a = (t/8)*Math.PI*2;
+                x.style.transform = translate3d(${Math.cos(a)*500}px, ${(t-4)*60}px, ${Math.sin(a)*500}px) rotateY(${-a}rad);
+                sc.appendChild(x);
             }
-            initTouch();
-            animate();
+            init();
+            loop();
         }
 
-        function initTouch() {
-            window.onmousedown = e => { isDown = true; lastX = e.clientX; lastY = e.clientY; };
-            window.onmousemove = e => { if(isDown) { rY += (e.clientX - lastX)*0.5; rX -= (e.clientY - lastY)*0.5; lastX = e.clientX; lastY = e.clientY; }};
-            window.onmouseup = () => isDown = false;
-
+        function init() {
             window.ontouchstart = e => {
-                if(e.touches.length === 2) pDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                else { isDown = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }
+                if(e.touches.length === 2) pD = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                else { isD = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; }
             };
             window.ontouchmove = e => {
                 if(e.touches.length === 2) {
                     let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                    zoom *= (d/pDist); zoom = Math.max(0.2, Math.min(zoom, 3)); pDist = d;
-                } else if(isDown) {
-                    rY += (e.touches[0].clientX - lastX)*0.5; rX -= (e.touches[0].clientY - lastY)*0.5;
-                    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                    z *= (d/pD); z = Math.max(0.2, Math.min(z, 3)); pD = d;
+                } else if(isD) {
+                    ry += (e.touches[0].clientX - lx)*0.5; rx -= (e.touches[0].clientY - ly)*0.5;
+                    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
                 }
             };
-            window.ontouchend = () => isDown = false;
+            window.ontouchend = () => isD = false;
         }
 
-        function animate() {
-            if(!isDown) rY += 0.12;
-            document.getElementById('scene').style.transform = rotateX(${rX}deg) rotateY(${rY}deg);
-            document.getElementById('scaler').style.transform = scale(${zoom});
-            requestAnimationFrame(animate);
+        function loop() {
+            if(!isD) ry += 0.15;
+            document.getElementById('scene').style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
+            document.getElementById('scaler').style.transform = scale(${z});
+            requestAnimationFrame(loop);
         }
     </script>
 </body>
