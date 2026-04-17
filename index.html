@@ -2,152 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kyal Sin Ko Ko Universe</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; }
         
-        /* LOGIN SCREEN */
         #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #3d0018, #000);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 1; transition: opacity 1s ease;
+            position: fixed; inset: 0; background: radial-gradient(circle, #1a0033, #000);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .login-box {
-            background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px;
-            backdrop-filter: blur(15px); border: 1px solid rgba(255, 105, 180, 0.4);
-            text-align: center; color: white; width: 80%; max-width: 300px;
+            background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px); border: 1px solid rgba(138, 43, 226, 0.3);
+            text-align: center; color: white; width: 85%; max-width: 320px;
         }
-        input { padding: 12px; border-radius: 25px; border: none; width: 90%; margin-bottom: 20px; text-align: center; font-size: 1rem; }
-        button { background: #ff1493; color: white; border: none; padding: 12px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; }
+        input { width: 90%; padding: 12px; border-radius: 25px; border: none; margin-bottom: 20px; text-align: center; background: rgba(255,255,255,0.9); }
+        button { width: 100%; padding: 12px; border-radius: 25px; border: none; background: #8a2be2; color: white; font-weight: bold; cursor: pointer; }
 
-        /* MAIN SCENE */
-        #main-content {
-            display: none; width: 100%; height: 100vh;
-            background: radial-gradient(circle at center, #1a000d 0%, #000 100%);
-            perspective: 2000px; opacity: 0; transform: scale(0.2);
-            transition: transform 3s ease-out, opacity 2s ease;
+        #main-content { display: none; width: 100%; height: 100vh; perspective: 1500px; background: radial-gradient(circle at center, #0a001a 0%, #000 100%); }
+
+        /* THE PLANET CORE */
+        .planet-core {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 150px; height: 150px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff00ff, #8a2be2, #000);
+            box-shadow: 0 0 60px rgba(138, 43, 226, 0.8), inset -20px -20px 50px rgba(0,0,0,0.5);
+            z-index: 10;
         }
-        .zoom-active { display: block !important; opacity: 1 !important; transform: scale(1) !important; }
 
-        .heart-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; z-index: 100; filter: drop-shadow(0 0 20px #ff1493); }
+        /* CONTAINER THAT YOU ROTATE */
+        #scene-root {
+            position: absolute; top: 50%; left: 50%; transform-style: preserve-3d;
+            width: 0; height: 0; pointer-events: none;
+        }
 
-        /* ORBITING */
-        .orbit-wrap { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; animation: rotate360 30s linear infinite; }
-        @keyframes rotate360 { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-
-        .photo-card { position: absolute; width: 60px; height: 60px; background: #fff; border: 1px solid #fff; border-radius: 5px; overflow: hidden; }
+        .photo-card {
+            position: absolute; width: 70px; height: 70px;
+            background: #fff; border: 2px solid #fff; border-radius: 10px;
+            overflow: hidden; box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            backface-visibility: hidden;
+        }
         .photo-card img { width: 100%; height: 100%; object-fit: cover; }
 
-        .orbit-word { position: absolute; color: #fff; font-family: 'Pacifico', cursive; font-size: 1.8rem; white-space: nowrap; text-shadow: 0 0 10px #ff1493; backface-visibility: visible; }
-        
-        .bg-star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; }
+        .orbit-text {
+            position: absolute; color: #fff; font-family: 'Pacifico', cursive;
+            font-size: 1.8rem; white-space: nowrap; pointer-events: none;
+            text-shadow: 0 0 15px #8a2be2; backface-visibility: visible;
+        }
+
+        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.8; }
     </style>
 </head>
 <body>
 
-    <audio id="bg-music" loop>
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
-
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="font-family: 'Pacifico', cursive;">Universe</h2>
-            <input type="text" id="username" placeholder="Enter Name..." autocomplete="off">
-            <br>
-            <button id="enter-btn">Enter Orbit</button>
+            <h2 style="font-family: 'Pacifico';">Enter Universe</h2>
+            <input type="text" id="username" placeholder="Full Name..." autocomplete="off">
+            <button id="enter-btn">Unlock Orbit</button>
         </div>
     </div>
 
     <div id="main-content">
         <div id="star-field"></div>
-        <img class="heart-center" src="https://pngimg.com/uploads/heart/heart_PNG51335.png">
-        <div class="orbit-wrap" id="image-garden"></div>
-        <div class="orbit-wrap" id="text-garden"></div>
+        <div class="planet-core"></div>
+        <div id="scene-root"></div>
     </div>
 
     <script>
-        // Use window.onload to ensure the button is fully loaded before trying to click it
-        window.onload = function() {
-            var btn = document.getElementById('enter-btn');
+        let rotationY = 0;
+        let rotationX = -10;
+        let isDragging = false;
+        let lastX, lastY;
+
+        document.getElementById('enter-btn').addEventListener('click', () => {
+            if(document.getElementById('username').value.trim() === "Kyal Sin Ko Ko") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                initUniverse();
+            } else {
+                alert("Incorrect Access Name");
+            }
+        });function initUniverse() {
+            const root = document.getElementById('scene-root');
             
-            btn.onclick = function() {
-                var nameInput = document.getElementById('username').value.trim();// Alert if the name is wrong so we know the button is at least "awake"
-                if (nameInput === "Kyal Sin Ko Ko") {
-                    start();
-                } else {
-                    alert("Name is incorrect. Please try again.");
-                }
-            };
-        };
+            // 1. Create 172 Images in a Spherical Shell
+            for (let i = 1; i <= 172; i++) {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                
+                const phi = Math.acos(-1 + (2 * i) / 172);
+                const theta = Math.sqrt(172 * Math.PI) * phi;
+                const radius = 350 + (Math.random() * 50);
 
-        function start() {
-            document.getElementById('login-screen').style.opacity = "0";
-            setTimeout(function() { 
-                document.getElementById('login-screen').style.display = 'none'; 
-            }, 1000);
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.sin(phi) * Math.sin(theta);
+                const z = radius * Math.cos(phi);
 
-            var main = document.getElementById('main-content');
-            main.style.display = 'block';
-            
-            // Try music but don't let it stop the show if it fails
-            var music = document.getElementById('bg-music');
-            music.play().catch(function(e) { console.log("Music blocked"); });
+                card.style.transform = translate3d(${x}px, ${y}px, ${z}px);
+                card.innerHTML = <img src="images/1 (${i}).jpg" onerror="this.src='https://via.placeholder.com/100/8a2be2/ffffff?text=Image+${i}'">;
+                root.appendChild(card);
+            }
 
-            setTimeout(function() {
-                main.classList.add('zoom-active');
-            }, 100);
+            // 2. Create Multiple "I love Kyal Sin Ko Ko" Texts
+            const textLines = 8; 
+            for (let j = 0; j < textLines; j++) {
+                const text = document.createElement('div');
+                text.className = 'orbit-text';
+                text.innerText = "I love Kyal Sin Ko Ko";
+                
+                const angle = (j / textLines) * Math.PI * 2;
+                const x = Math.cos(angle) * 500;
+                const z = Math.sin(angle) * 500;
+                const y = (j - 4) * 80;
+
+                text.style.transform = translate3d(${x}px, ${y}px, ${z}px) rotateY(${-angle}rad);
+                root.appendChild(text);
+            }
 
             createStars();
-            spawnImages();
-            spawnText();
+            addInteractions();
+            animate();
         }
 
         function createStars() {
-            var field = document.getElementById('star-field');
-            for (var i = 0; i < 100; i++) {
-                var s = document.createElement('div');
-                s.className = 'bg-star';
-                s.style.width = '2px'; s.style.height = '2px';
+            const field = document.getElementById('star-field');
+            for (let i = 0; i < 200; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                s.style.width = Math.random() * 3 + 'px';
+                s.style.height = s.style.width;
                 s.style.top = Math.random() * 100 + 'vh';
                 s.style.left = Math.random() * 100 + 'vw';
                 field.appendChild(s);
             }
         }
 
-        function spawnImages() {
-            var g = document.getElementById('image-garden');
-            for (var i = 1; i <= 172; i++) {
-                var card = document.createElement('div');
-                card.className = 'photo-card';
-                var angle = Math.random() * Math.PI * 2;
-                var radius = 300 + Math.random() * 400;
-                var y = (Math.random() - 0.5) * 600;
-                var x = Math.cos(angle) * radius;
-                var z = Math.sin(angle) * radius;
-                card.style.transform = "translate3d("+x+"px, "+y+"px, "+z+"px) rotateY("+(-angle)+"rad)";
-                
-                // IMPORTANT: Looks for images/1 (1).jpg
-                card.innerHTML = '<img src="images/1 (' + i + ').jpg" onerror="this.src=\'https://via.placeholder.com/60?text=❤️\'">';
-                g.appendChild(card);
-            }
+        // 360 HAND ROTATION LOGIC
+        function addInteractions() {
+            window.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+            window.addEventListener('touchstart', e => { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
+            
+            window.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                rotationY += (e.clientX - lastX) * 0.3;
+                rotationX -= (e.clientY - lastY) * 0.3;
+                lastX = e.clientX; lastY = e.clientY;
+            });
+
+            window.addEventListener('touchmove', e => {
+                if (!isDragging) return;
+                rotationY += (e.touches[0].clientX - lastX) * 0.5;
+                rotationX -= (e.touches[0].clientY - lastY) * 0.5;
+                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+            });
+
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('touchend', () => isDragging = false);
         }
 
-        function spawnText() {
-            var g = document.getElementById('text-garden');
-            var words = ["I", "love", "you", "Kyal Sin Ko Ko", "❤️"];
-            for (var i = 0; i < words.length; i++) {
-                var s = document.createElement('span');
-                s.className = 'orbit-word';
-                s.innerText = words[i];
-                var angle = (i / words.length) * Math.PI * 2;
-                var x = Math.cos(angle) * 400;
-                var z = Math.sin(angle) * 400;
-                s.style.transform = "translate3d("+x+"px, 0px, "+z+"px) rotateY("+(-angle)+"rad) translate(-50%, -50%)";
-                g.appendChild(s);
-            }
+        function animate() {
+            // Constant drift + manual rotation
+            if (!isDragging) rotationY += 0.1; 
+            document.getElementById('scene-root').style.transform = rotateX(${rotationX}deg) rotateY(${rotationY}deg);
+            requestAnimationFrame(animate);
         }
     </script>
 </body>
