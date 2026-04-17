@@ -3,38 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Universe | Kyal Sin Ko Ko</title>
+    <title>Universe</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
-        #universe { width: 100%; height: 100vh; perspective: 1200px; background: radial-gradient(circle at center, #1a000d 0%, #000 100%); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; }
+        
+        #universe { width: 100%; height: 100vh; perspective: 1000px; background: #000; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* HIGH-QUALITY SPHERE PLANET */
+        /* THE PERFECT SPHERE PLANET */
         .planet {
-            position: absolute; width: 130px; height: 130px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffb3d9, #ff1493 45%, #660022 85%, #000 100%);
+            position: absolute; width: 120px; height: 120px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffb3d9, #ff1493 40%, #000 100%);
             transform: translate(-50%, -50%); 
-            box-shadow: 0 0 80px rgba(255, 20, 147, 0.7), inset -15px -15px 40px rgba(0,0,0,0.9);
+            box-shadow: 0 0 50px #ff1493, inset -10px -10px 30px #000;
             display: flex; justify-content: center; align-items: center; z-index: 10;
-            animation: pulse 3s infinite ease-in-out;
         }
-        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.05); } }
-        .planet::after { content: '❤️'; font-size: 3rem; filter: drop-shadow(0 0 10px white); }
+        .planet::after { content: '❤️'; font-size: 2.5rem; }
 
         /* PHOTO CARDS */
         .card { 
-            position: absolute; width: 85px; height: 85px; background: #fff; 
-            padding: 3px; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center;
+            position: absolute; width: 70px; height: 70px; background: #fff; 
+            padding: 3px; border-radius: 4px; display: block;
         }
-        .card img { width: 100%; height: 100%; object-fit: cover; border-radius: 2px; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* PARTICLES */
-        .star { position: absolute; background: #fff; border-radius: 50%; pointer-events: none; }
-        .love-text { position: absolute; color: #ff69b4; font-weight: bold; font-size: 1.2rem; white-space: nowrap; pointer-events: none; text-shadow: 0 0 15px #ff1493; }
+        .star { position: absolute; background: #fff; border-radius: 50%; width: 2px; height: 2px; }
     </style>
 </head>
-<body onload="init()">
+<body>
 
     <div id="universe">
         <div id="scene">
@@ -45,102 +41,57 @@
     <script>
         let ry = 0, rx = -10, isDragging = false, lastX, lastY;
         const scene = document.getElementById('scene');
+        const items = [];
 
-        function init() {
-            // 1. Generate Stars (Particles)
-            for(let i=0; i<400; i++) {
-                const s = document.createElement('div');
-                s.className = 'star';
-                const r = 250 + Math.random() * 1100;
-                const phi = Math.random() * 6.28;
-                const theta = Math.random() * 3.14;
-                
-                const x = r * Math.sin(theta) * Math.cos(phi);
-                const y = r * Math.sin(theta) * Math.sin(phi);
-                const z = r * Math.cos(theta);
-                
-                s.style.width = s.style.height = (Math.random() * 3 + 1) + 'px';
-                s.style.opacity = Math.random();
-                
-                // Store coordinates directly
-                s.setAttribute('data-x', x);
-                s.setAttribute('data-y', y);
-                s.setAttribute('data-z', z);
-                scene.appendChild(s);
-            }
-
-            // 2. Generate 172 Photos (Randomly spread)
-            for(let i=1; i<=172; i++) {
-                const c = document.createElement('div');
-                c.className = 'card';
-                
-                const r = 400 + Math.random() * 500; 
-                const phi = Math.random() * 6.28;
-                const theta = Math.random() * 3.14;
-                
-                const x = r * Math.sin(theta) * Math.cos(phi);
-                const y = r * Math.sin(theta) * Math.sin(phi);const z = r * Math.cos(theta);
-                
-                c.setAttribute('data-x', x);
-                c.setAttribute('data-y', y);
-                c.setAttribute('data-z', z);
-                
-                const img = document.createElement('img');
-                img.src = 1 (${i}).jpg;
-                img.onerror = function() { 
-                    this.src = 1(${i}).jpg; 
-                    this.onerror = function() { this.parentElement.remove(); };
-                };
-                
-                c.appendChild(img);
-                scene.appendChild(c);
-            }
-
-            // 3. Floating English Text
-            const words = ["Love You", "Forever", "Always", "Queen", "Beautiful"];
-            for(let i=0; i<15; i++) {
-                const t = document.createElement('div');
-                t.className = 'love-text';
-                t.innerText = words[i % 5];
-                const r = 600 + Math.random() * 200;
-                const p = Math.random() * 6.28, th = Math.random() * 3.14;
-                
-                t.setAttribute('data-x', r * Math.sin(th) * Math.cos(p));
-                t.setAttribute('data-y', r * Math.sin(th) * Math.sin(p));
-                t.setAttribute('data-z', r * Math.cos(th));
-                scene.appendChild(t);
-            }
-
-            animate();
+        // 1. Create Stars
+        for(let i=0; i<300; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            const r = 200 + Math.random() * 800;
+            const p = Math.random() * 6.28, t = Math.random() * 3.14;
+            const x = r * Math.sin(t) * Math.cos(p);
+            const y = r * Math.sin(t) * Math.sin(p);
+            const z = r * Math.cos(t);
+            scene.appendChild(s);
+            items.push({ el: s, x: x, y: y, z: z });
         }
 
-        // --- Interaction ---
+        // 2. Create Photos
+        for(let i=1; i<=172; i++) {
+            const c = document.createElement('div');
+            c.className = 'card';
+            const r = 300 + Math.random() * 500;
+            const p = Math.random() * 6.28, t = Math.random() * 3.14;
+            const x = r * Math.sin(t) * Math.cos(p);
+            const y = r * Math.sin(t) * Math.sin(p);
+            const z = r * Math.cos(t);
+            
+            c.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='1(${i}).jpg';">;
+            scene.appendChild(c);
+            items.push({ el: c, x: x, y: y, z: z });
+        }
+
+        // --- Touch ---
         window.addEventListener('touchstart', e => { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
         window.addEventListener('touchmove', e => {
             if(!isDragging) return;
-            ry += (e.touches[0].clientX - lastX) * 0.4;
-            rx -= (e.touches[0].clientY - lastY) * 0.4;
+            ry += (e.touches[0].clientX - lastX) * 0.3;
+            rx -= (e.touches[0].clientY - lastY) * 0.3;
             lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
         });
         window.addEventListener('touchend', () => isDragging = false);
 
         function animate() {
-            if(!isDragging) ry += 0.15; 
-            
+            if(!isDragging) ry += 0.1;
             scene.style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
             
-            // Forces all items to calculate position and face user
-            const items = document.querySelectorAll('.card, .love-text, .star');
+            // BILLBOARDING (Face the screen)
             items.forEach(item => {
-                const x = item.getAttribute('data-x');
-                const y = item.getAttribute('data-y');
-                const z = item.getAttribute('data-z');
-                // The -rx and -ry in the rotation counteracts the scene rotation
-                item.style.transform = translate3d(${x}px, ${y}px, ${z}px) rotateY(${-ry}deg) rotateX(${-rx}deg);
+                item.el.style.transform = translate3d(${item.x}px, ${item.y}px, ${item.z}px) rotateY(${-ry}deg) rotateX(${-rx}deg);
             });
-
             requestAnimationFrame(animate);
         }
+        animate();
     </script>
 </body>
 </html>
