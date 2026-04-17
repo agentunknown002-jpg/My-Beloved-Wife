@@ -24,7 +24,7 @@
 
         /* THE UNIVERSE */
         #universe { display: none; width: 100%; height: 100vh; perspective: 1000px; touch-action: none; }
-        #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
+        #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
 
         /* THE PREMIUM PLANET */
         .planet {
@@ -65,16 +65,17 @@
 
     <script>
         let ry = 0;
-        let isMoving = false;
+        let rx = -10;
+        let isDragging = false;
+        let lastX, lastY;
 
         function init() {
-            // Instant Switch
             document.getElementById('gate').style.display = 'none';
             document.getElementById('universe').style.display = 'block';
             
             const scene = document.getElementById('scene');
 
-            // 1. Quick Stars
+            // 1. Stars
             for(let i=0; i<150; i++) {
                 let s = document.createElement('div');
                 s.className = 'star';
@@ -83,44 +84,43 @@
                 s.style.width = s.style.height = '2px';
                 s.style.transform = translate3d(${r*Math.sin(t)*Math.cos(p)}px, ${r*Math.sin(t)*Math.sin(p)}px, ${r*Math.cos(t)}px);
                 scene.appendChild(s);
-            }// 2. Slow-Spawn Photos (The GitHub Fix)
+            }// 2. Slow-Spawn Photos
             let imgIndex = 1;
             function spawnPhoto() {
                 if(imgIndex > 172) return;
-                
                 let c = document.createElement('div');
                 c.className = 'card';
                 let a = (imgIndex / 172) * Math.PI * 2;
                 let r = 350 + (Math.random() * 150);
                 let y = (Math.random() - 0.5) * 600;
-                
                 c.style.transform = translate3d(${Math.cos(a)*r}px, ${y}px, ${Math.sin(a)*r}px) rotateY(${-a}rad);
                 c.innerHTML = <img src="1 (${imgIndex}).jpg" onerror="this.parentElement.remove()">;
                 scene.appendChild(c);
-                
                 setTimeout(() => { c.style.opacity = "1"; }, 100);
                 imgIndex++;
-                // This delay prevents GitHub from blocking the requests
                 setTimeout(spawnPhoto, 50); 
             }
             spawnPhoto();
 
-            // 3. Text
-            for(let j=0; j<8; j++){
-                let t = document.createElement('div');
-                t.className = 'love-text';
-                t.innerText = "I love Kyal Sin Ko Ko";
-                let a = (j/8)*Math.PI*2;
-                t.style.transform = translate3d(${Math.cos(a)*500}px, ${(j-4)*80}px, ${Math.sin(a)*500}px) rotateY(${-a}rad);
-                scene.appendChild(t);
-            }
+            // 3. Controls
+            window.ontouchstart = (e) => { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; };
+            window.ontouchmove = (e) => {
+                if (!isDragging) return;
+                let dx = e.touches[0].clientX - lastX;
+                let dy = e.touches[0].clientY - lastY;
+                ry += dx * 0.3;
+                rx -= dy * 0.3;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            };
+            window.ontouchend = () => { isDragging = false; };
 
             loop();
         }
 
         function loop() {
-            ry += 0.15;
-            document.getElementById('scene').style.transform = rotateY(${ry}deg) rotateX(-10deg);
+            if(!isDragging) ry += 0.15;
+            document.getElementById('scene').style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
             requestAnimationFrame(loop);
         }
     </script>
