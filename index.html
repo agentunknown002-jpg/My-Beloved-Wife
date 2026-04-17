@@ -3,97 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Beloved Wife</title>
+    <title>Kyal Sin Ko Ko - Space Orbit</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #000; overflow: hidden;
+            background: #000; overflow: hidden;
             font-family: 'Arial', sans-serif;
         }
 
         /* LOGIN SCREEN */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #4a001e, #000000);
+            background: radial-gradient(circle, #3d0018, #000);
             display: flex; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 1; transition: opacity 1s ease;
+            z-index: 9999; transition: opacity 1s ease;
         }
 
         .login-box {
             background: rgba(255, 255, 255, 0.1);
-            padding: 40px; border-radius: 20px;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 105, 180, 0.4);
+            padding: 30px; border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 105, 180, 0.5);
             text-align: center; color: white;
-            box-shadow: 0 0 30px rgba(255, 20, 147, 0.3);
-            width: 80%; max-width: 350px;
+            box-shadow: 0 0 25px rgba(255, 20, 147, 0.5);
         }
 
         input {
             padding: 12px; border-radius: 25px; border: none;
-            width: 80%; margin-bottom: 20px; outline: none;
-            text-align: center; font-size: 1rem;
-            color: #333;
+            width: 200px; margin-bottom: 20px; text-align: center;
+            outline: none; font-size: 1rem;
         }
 
         button {
             background: #ff1493; color: white; border: none;
-            padding: 12px 30px; border-radius: 25px;
-            cursor: pointer; font-weight: bold; transition: 0.3s;
-            font-size: 1rem;
+            padding: 10px 25px; border-radius: 20px;
+            cursor: pointer; font-weight: bold; font-size: 1rem;
         }
 
-        button:active { transform: scale(0.95); }
-
-        /* MAIN SCENE (Initially Hidden) */
+        /* MAIN SCENE */
         #main-content {
             display: none; width: 100%; height: 100vh;
-            background: radial-gradient(circle, #2b0017, #000);
-            position: relative; overflow: hidden;
-            transform: scale(0); opacity: 0;
-            transition: transform 2.5s ease-out, opacity 2s ease;
+            background: radial-gradient(circle at center, #1a000d 0%, #000 100%);
+            perspective: 1500px;
+            opacity: 0; transform: scale(0.3);
+            transition: transform 3s cubic-bezier(0.1, 0.5, 0.2, 1), opacity 2s ease;
         }
 
-        /* This class triggers the Zoom In */
-        .zoom-in-effect {
-            display: block !important; transform: scale(1) !important; opacity: 1 !important;
+        .zoom-active { display: block !important; opacity: 1 !important; transform: scale(1) !important; }
+
+        /* TWINKLING STARS (Background, non-orbiting) */
+        .bg-star {
+            position: absolute; background: white; border-radius: 50%;
+            opacity: 0.5; animation: twinkle var(--duration) infinite ease-in-out;
         }
 
-        .heart_planet_love {
-            font-family: 'Pacifico', cursive;
-            font-size: 2.5rem; color: #ffffff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 30px #ff1493;
-            text-align: center; padding-top: 40px;
-            letter-spacing: 2px; position: relative; z-index: 100;
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
-        /* THE ORBIT SYSTEM */
-        .universe {
+        /* CENTER HEART */
+        .heart-center {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
+            width: 120px; z-index: 100;
+            filter: drop-shadow(0 0 20px #ff1493);
         }
 
-        .center-planet img {
-            width: 120px; height: 120px;
-            filter: drop-shadow(0 0 25px #ff1493);
-            z-index: 50; position: relative;
+        /* 360 DEGREE ORBIT WRAP (Shared by all orbiting elements) */
+        .orbit-wrap {
+            position: absolute; top: 50%; left: 50%;
+            transform-style: preserve-3d;
+            animation: rotate360 25s linear infinite; /* The 360 cycle */
         }
 
-        .orbit-photo {
-            position: absolute; width: 55px; height: 55px;
-            border-radius: 8px; border: 1.5px solid white;
-            overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.4);
-            animation: orbit linear infinite;
+        @keyframes rotate360 {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
         }
 
-        .orbit-photo img { width: 100%; height: 100%; object-fit: cover; }
+        /* ORBITING PHOTO CARD */
+        .photo-card {
+            position: absolute; width: 65px; height: 65px;
+            background: #fff; border: 1.5px solid #fff;
+            border-radius: 6px; overflow: hidden;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
 
-        @keyframes orbit {
-            from { transform: rotate(0deg) translateX(var(--distance)) rotate(0deg); }
-            to   { transform: rotate(360deg) translateX(var(--distance)) rotate(-360deg); }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ORBITING TEXT (Like I shown in the image) */
+        .orbit-text-wrap {
+            position: absolute;
+            transform-style: preserve-3d;
+            animation: rotate360 15s linear infinite; /* Text text-orbit is faster */
+        }
+
+        .orbit-word {
+            position: absolute;
+            color: #fff; font-family: 'Pacifico', cursive;
+            font-size: 1.8rem; letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493;
+            /* Ensures word always faces the user while orbiting */
+            backface-visibility: visible;
+        }/* ORBITING TEXT-STARS */
+        .orbit-star {
+            position: absolute; color: white; font-size: 20px;
+            animation: rotate360 linear infinite reverse; /* Backwards rotate */
         }
     </style>
 </head>
@@ -105,79 +122,125 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="font-family: 'Pacifico', cursive; margin-top: 0;">Welcome</h2><p style="font-size: 0.9rem; margin-bottom: 20px;">Please enter the name of the most beautiful woman</p>
-            <input type="text" id="username" placeholder="Full Name..." autocomplete="off">
+            <h2 style="margin-top:0">A Space of Memories</h2>
+            <input type="text" id="username" placeholder="Name..." autocomplete="off">
             <br>
-            <button id="loginBtn" onclick="checkLogin()">Enter Orbit</button>
+            <button onclick="enterOrbit()">Enter Orbit</button>
         </div>
     </div>
 
     <div id="main-content">
-        <h1 class="heart_planet_love">ALEX DEV</h1>
-        <div class="universe">
-            <div class="center-planet">
-                <img src="https://pngimg.com/uploads/heart/heart_PNG51335.png" alt="Heart">
-            </div>
-            <div id="orbit-garden"></div>
-        </div>
+        <div id="bg-star-field"></div>
+        
+        <img class="heart-center" src="https://pngimg.com/uploads/heart/heart_PNG51335.png" alt="Heart">
+        
+        <div class="orbit-wrap" id="image-garden"></div>
+
+        <div id="text-star-orbit-field"></div>
     </div>
 
     <script>
-        function checkLogin() {
-            const userInp = document.getElementById('username').value.trim();
-            const music = document.getElementById('bg-music');
-            const mainContent = document.getElementById('main-content');
-            const loginScreen = document.getElementById('login-screen');
-            
-            // Log for debugging (You can see this in Inspect Element)
-            console.log("Attempted name: " + userInp);
+        function enterOrbit() {
+            const name = document.getElementById('username').value.trim();
+            if (name === "Kyal Sin Ko Ko") {
+                document.getElementById('login-screen').style.opacity = "0";
+                setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 1000);
 
-            if (userInp === "Kyal Sin Ko Ko") {
-                // 1. Fade out the login screen
-                loginScreen.style.opacity = "0";
+                const main = document.getElementById('main-content');
+                main.classList.add('zoom-active');
                 
-                // 2. Start Music
-                music.play().catch(function(error) {
-                    console.log("Music play auto-blocked, but moving forward.");
-                });
+                document.getElementById('bg-music').play().catch(() => console.log("Music play blocked"));
 
-                // 3. Generate the 172 images
-                generateImages(172);
-                
-                // 4. Show the main scene and trigger the Zoom
-                mainContent.style.display = 'block';
-                setTimeout(function() {
-                    loginScreen.style.display = 'none';
-                    mainContent.classList.add('zoom-in-effect');
-                }, 1000); 
-
+                createBackgroundStars();
+                spawnImages(172);
+                createOrbitingText();
+                createOrbitingStars(20);
             } else {
-                alert("That's not the correct name! Please check spaces and spelling.");
+                alert("Incorrect access name. Please try again.");
             }
         }
 
-        function generateImages(count) {
-            const garden = document.getElementById('orbit-garden');
-            // Clear existing if any
-            garden.innerHTML = ''; 
+        function createBackgroundStars() {
+            const field = document.getElementById('bg-star-field');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'bg-star';
+                const size = Math.random() * 3 + 'px';
+                star.style.width = size;
+                star.style.height = size;
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                field.appendChild(star);
+            }
+        }
 
+        function spawnImages(count) {
+            const garden = document.getElementById('image-garden');
             for (let i = 1; i <= count; i++) {
-                const imgDiv = document.createElement('div');
-                imgDiv.className = 'orbit-photo';
+                const card = document.createElement('div');
+                card.className = 'photo-card';
                 
-                // Spread images out across the screen
-                const distance = Math.floor(Math.random() * 350) + 100; 
-                const duration = Math.floor(Math.random() * 25) + 12;   
-                const delay = Math.random() * -40;                      
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 280 + Math.random() * 250; 
+                const yPos = (Math.random() - 0.5) * 500; 
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+
+                card.style.transform = translate3d(${x}px, ${yPos}px, ${z}px) rotateY(${-angle}rad);
                 
-                imgDiv.style.setProperty('--distance', distance + 'px');
-                imgDiv.style.animationDuration = duration + 's';
-                imgDiv.style.animationDelay = delay + 's';
+                card.innerHTML = <img src="images/${i}.jpg" onerror="this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'">;
+                garden.appendChild(card);
+            }
+        }
+
+        function createOrbitingText() {
+            const textOrbitWrap = document.createElement('div');
+            textOrbitWrap.className = 'orbit-text-wrap';
+            
+            const words = ["I", "love", "you", "Kyal Sin Ko Ko", "❤️"];
+            const radius = 300; // Text orbit distance
+            
+            words.forEach((word, index) => {
+                const span = document.createElement('span');
+                span.className = 'orbit-word';
+                span.innerText = word;
                 
-                // If images/1.jpg doesn't exist, it shows a pink placeholder
-                imgDiv.innerHTML = '<img src="images/' + i + '.jpg" onerror="this.src=\'https://via.placeholder.com/100/ff1493/ffffff?text=Love\'">';
+                const angle = (index / words.length) * Math.PI * 2;
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;// Position the word in 3D, and ensure the word text faces forward
+                span.style.transform = translate3d(${x}px, 0px, ${z}px) rotateY(${-angle}rad) translate(-50%, -50%);
                 
-                garden.appendChild(imgDiv);
+                textOrbitWrap.appendChild(span);
+            });
+            
+            document.getElementById('text-star-orbit-field').appendChild(textOrbitWrap);
+        }
+
+        function createOrbitingStars(count) {
+            const textStarField = document.getElementById('text-star-orbit-field');
+            const radius = 350; // Orbit ring distance for stars
+
+            for(let i=0; i<count; i++) {
+                const starOrbitWrap = document.createElement('div');
+                starOrbitWrap.className = 'orbit-wrap';
+                
+                const star = document.createElement('div');
+                star.className = 'orbit-star';
+                star.innerHTML = '✨';
+
+                const angle = (i / count) * Math.PI * 2;
+                const yPos = (Math.random() - 0.5) * 150; // Spread vertically near the text ring
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+
+                // Randomize speed of text-orbit
+                starOrbitWrap.style.animationDuration = (Math.random() * 20 + 20) + 's';
+
+                star.style.transform = translate3d(${x}px, ${yPos}px, ${z}px);
+                
+                starOrbitWrap.appendChild(star);
+                textStarField.appendChild(starOrbitWrap);
             }
         }
     </script>
