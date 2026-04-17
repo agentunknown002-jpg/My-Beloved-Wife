@@ -2,43 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Universe</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; color: white; }
-        #universe { width: 100%; height: 100vh; perspective: 1000px; background: #000; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; }
+        #universe { width: 100%; height: 100vh; perspective: 1000px; background: radial-gradient(circle, #1a000d, #000); }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* THE GLOBE */
-        .planet {
-            position: absolute; width: 120px; height: 120px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffb3d9, #ff1493 45%, #000 100%);
-            transform: translate(-50%, -50%); 
-            box-shadow: 0 0 50px #ff1493; z-index: 100;
-            display: flex; justify-content: center; align-items: center; font-size: 40px;
-        }
-
-        /* CARDS - Forced visibility */
+        /* PHOTO CARDS */
         .card { 
-            position: absolute; width: 80px; height: 80px; background: white; 
-            padding: 2px; border-radius: 4px; display: block !important;
+            position: absolute; width: 75px; height: 75px; background: white; 
+            padding: 2px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: block;
         }
-        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         
-        /* STARS */
-        .star { position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px; }
+        /* STARS & CORE PARTICLES */
+        .star { position: absolute; background: white; border-radius: 50%; pointer-events: none; }
+        .core-star { position: absolute; background: #ff1493; border-radius: 50%; box-shadow: 0 0 10px #ff69b4; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <div id="universe">
         <div id="scene">
-            <div class="planet">❤️</div>
-        </div>
+            </div>
     </div>
 
     <script>
-        // Use old-school variable declarations for maximum PC compatibility
         var scene = document.getElementById('scene');
         var ry = 0;
         var rx = -10;
@@ -46,64 +37,89 @@
         var lastX, lastY;
         var allItems = [];
 
-        // 1. Create 200 Stars
-        for (var i = 0; i < 200; i++) {
+        // 1. CREATE CENTRAL PARTICLE CORE (Replacing the planet)
+        for (var c = 0; c < 150; c++) {
+            var cs = document.createElement('div');
+            cs.className = 'core-star';
+            var cr = Math.random() * 40; // Small radius for core
+            var cp = Math.random() * 6.28;
+            var ct = Math.random() * 3.14;
+            var cx = cr * Math.sin(ct) * Math.cos(cp);
+            var cy = cr * Math.sin(ct) * Math.sin(cp);
+            var cz = cr * Math.cos(ct);
+            cs.style.width = cs.style.height = (Math.random() * 4 + 2) + 'px';
+            scene.appendChild(cs);
+            allItems.push({ el: cs, x: cx, y: cy, z: cz });
+        }
+
+        // 2. CREATE OUTER STARS
+        for (var i = 0; i < 300; i++) {
             var s = document.createElement('div');
             s.className = 'star';
-            var r = 200 + Math.random() * 1000;
+            var r = 150 + Math.random() * 900;
             var p = Math.random() * 6.28;
             var t = Math.random() * 3.14;
             var x = r * Math.sin(t) * Math.cos(p);
             var y = r * Math.sin(t) * Math.sin(p);
             var z = r * Math.cos(t);
+            s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
             scene.appendChild(s);
             allItems.push({ el: s, x: x, y: y, z: z });
         }
 
-        // 2. Create 172 Photos
+        // 3. CREATE 172 PHOTOS (Random Spread)
         for (var j = 1; j <= 172; j++) {
-            var c = document.createElement('div');
-            c.className = 'card';
-            var r2 = 350 + Math.random() * 500;
+            var card = document.createElement('div');
+            card.className = 'card';
+            var r2 = 300 + Math.random() * 500;
             var p2 = Math.random() * 6.28;
             var t2 = Math.random() * 3.14;
             var x2 = r2 * Math.sin(t2) * Math.cos(p2);
             var y2 = r2 * Math.sin(t2) * Math.sin(p2);
             var z2 = r2 * Math.cos(t2);
             
-            // Simplified Image loading
-            c.innerHTML = '<img src="1 (' + j + ').jpg" onerror="this.src=\'1(' + j + ').jpg\';">';
-            
-            scene.appendChild(c);
-            allItems.push({ el: c, x: x2, y: y2, z: z2 });
+            card.innerHTML = '<img src="1 (' + j + ').jpg" onerror="this.src=\'1(' + j + ').jpg\';">';
+            scene.appendChild(card);
+            allItems.push({ el: card, x: x2, y: y2, z: z2 });
         }
 
-        // 3. Mouse Events
-        window.onmousedown = function(e) { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
-        window.onmousemove = function(e) {
+        // --- MOUSE & TOUCH CONTROLS ---
+        function startDrag(x, y) {
+            isDragging = true;
+            lastX = x;
+            lastY = y;
+        }
+        function moveDrag(x, y) {
             if (!isDragging) return;
-            ry += (e.clientX - lastX) * 0.3;
-            rx -= (e.clientY - lastY) * 0.3;
-            lastX = e.clientX;
-            lastY = e.clientY;
-        };
-        window.onmouseup = function() { isDragging = false; };
+            ry += (x - lastX) * 0.3;
+            rx -= (y - lastY) * 0.3;
+            lastX = x;
+            lastY = y;
+        }
+        function endDrag() { isDragging = false; }// Mouse Events
+        window.onmousedown = function(e) { startDrag(e.clientX, e.clientY); };
+        window.onmousemove = function(e) { moveDrag(e.clientX, e.clientY); };
+        window.onmouseup = endDrag;
 
-        // 4. Animation Loop
+        // Touch Events (For Mobile)
+        window.ontouchstart = function(e) { startDrag(e.touches[0].clientX, e.touches[0].clientY); };
+        window.ontouchmove = function(e) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); };
+        window.ontouchend = endDrag;
+
+        // --- ANIMATION LOOP ---
         function animate() {
-            if (!isDragging) { ry += 0.1; }
+            if (!isDragging) { ry += 0.15; } // Automatic slow spin
             
             scene.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
             
             for (var k = 0; k < allItems.length; k++) {
                 var item = allItems[k];
-                // THE KEY: Move and Un-rotate each item
+                // BILLBOARDING: translate and counter-rotate
                 item.el.style.transform = 'translate3d(' + item.x + 'px,' + item.y + 'px,' + item.z + 'px) rotateY(' + (-ry) + 'deg) rotateX(' + (-rx) + 'deg)';
             }
             window.requestAnimationFrame(animate);
         }
 
-        // START
         animate();
     </script>
 </body>
