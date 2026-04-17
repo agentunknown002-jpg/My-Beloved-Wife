@@ -2,34 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; color: white; }
-        
-        #universe { width: 100%; height: 100vh; perspective: 1000px; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; color: white; }
+        #universe { width: 100%; height: 100vh; perspective: 1000px; background: #000; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* THE SPHERE PLANET */
+        /* THE GLOBE */
         .planet {
             position: absolute; width: 120px; height: 120px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #ffb3d9, #ff1493 45%, #000 100%);
             transform: translate(-50%, -50%); 
-            box-shadow: 0 0 50px #ff1493, inset -10px -10px 30px #000;
-            z-index: 10;
+            box-shadow: 0 0 50px #ff1493; z-index: 100;
+            display: flex; justify-content: center; align-items: center; font-size: 40px;
         }
 
-        /* PHOTO CARDS */
+        /* CARDS - Forced visibility */
         .card { 
-            position: absolute; width: 70px; height: 70px; background: #fff; 
-            padding: 3px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: absolute; width: 80px; height: 80px; background: white; 
+            padding: 2px; border-radius: 4px; display: block !important;
         }
-        .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
         
-        .star { position: absolute; background: #fff; border-radius: 50%; width: 2px; height: 2px; opacity: 0.8; }
-        
-        /* DEBUG OVERLAY - Only shows if there is an error */
-        #debug { position: fixed; bottom: 10px; left: 10px; font-size: 10px; color: #444; pointer-events: none; }
+        /* STARS */
+        .star { position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px; }
     </style>
 </head>
 <body>
@@ -39,80 +36,75 @@
             <div class="planet">❤️</div>
         </div>
     </div>
-    <div id="debug">System Active...</div>
 
     <script>
-        const scene = document.getElementById('scene');
-        const debug = document.getElementById('debug');
-        let ry = 0, rx = -10, isDragging = false, lastX, lastY;
-        const allItems = [];
+        // Use old-school variable declarations for maximum PC compatibility
+        var scene = document.getElementById('scene');
+        var ry = 0;
+        var rx = -10;
+        var isDragging = false;
+        var lastX, lastY;
+        var allItems = [];
 
-        // 1. CREATE STARS (Particles)
-        for(let i=0; i<200; i++) {
-            const s = document.createElement('div');
+        // 1. Create 200 Stars
+        for (var i = 0; i < 200; i++) {
+            var s = document.createElement('div');
             s.className = 'star';
-            const r = 200 + Math.random() * 800;
-            const p = Math.random() * 6.28, t = Math.random() * 3.14;
-            const pos = {
-                x: r * Math.sin(t) * Math.cos(p),
-                y: r * Math.sin(t) * Math.sin(p),
-                z: r * Math.cos(t)
-            };
+            var r = 200 + Math.random() * 1000;
+            var p = Math.random() * 6.28;
+            var t = Math.random() * 3.14;
+            var x = r * Math.sin(t) * Math.cos(p);
+            var y = r * Math.sin(t) * Math.sin(p);
+            var z = r * Math.cos(t);
             scene.appendChild(s);
-            allItems.push({ el: s, x: pos.x, y: pos.y, z: pos.z });
+            allItems.push({ el: s, x: x, y: y, z: z });
         }
 
-        // 2. CREATE PHOTOS (Direct Load)
-        for(let i=1; i<=172; i++) {
-            const c = document.createElement('div');
+        // 2. Create 172 Photos
+        for (var j = 1; j <= 172; j++) {
+            var c = document.createElement('div');
             c.className = 'card';
+            var r2 = 350 + Math.random() * 500;
+            var p2 = Math.random() * 6.28;
+            var t2 = Math.random() * 3.14;
+            var x2 = r2 * Math.sin(t2) * Math.cos(p2);
+            var y2 = r2 * Math.sin(t2) * Math.sin(p2);
+            var z2 = r2 * Math.cos(t2);
             
-            // Randomly spread in a bubble
-            const r = 300 + Math.random() * 500;
-            const p = Math.random() * 6.28, t = Math.random() * 3.14;
-            const x = r * Math.sin(t) * Math.cos(p);
-            const y = r * Math.sin(t) * Math.sin(p);
-            const z = r * Math.cos(t);
+            // Simplified Image loading
+            c.innerHTML = '<img src="1 (' + j + ').jpg" onerror="this.src=\'1(' + j + ').jpg\';">';
             
-            // Try different image path patterns
-            const img = document.createElement('img');
-            img.src = 1 (${i}).jpg; 
-            img.onerror = () => { img.src = 1(${i}).jpg; };
-            
-            c.appendChild(img);
             scene.appendChild(c);
-            allItems.push({ el: c, x: x, y: y, z: z });
+            allItems.push({ el: c, x: x2, y: y2, z: z2 });
         }
 
-        // 3. INTERACTION
-        window.addEventListener('touchstart', e => { 
-            isDragging = true; 
-            lastX = e.touches[0].clientX; 
-            lastY = e.touches[0].clientY; 
-        });
-        window.addEventListener('touchmove', e => {
-            if(!isDragging) return;
-            ry += (e.touches[0].clientX - lastX) * 0.4;
-            rx -= (e.touches[0].clientY - lastY) * 0.4;
-            lastX = e.touches[0].clientX;
-            lastY = e.touches[0].clientY;
-        });
-        window.addEventListener('touchend', () => isDragging = false);// 4. ANIMATION LOOP
+        // 3. Mouse Events
+        window.onmousedown = function(e) { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmousemove = function(e) {
+            if (!isDragging) return;
+            ry += (e.clientX - lastX) * 0.3;
+            rx -= (e.clientY - lastY) * 0.3;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        };
+        window.onmouseup = function() { isDragging = false; };
+
+        // 4. Animation Loop
         function animate() {
-            if(!isDragging) ry += 0.15; // Slow rotate
+            if (!isDragging) { ry += 0.1; }
             
-            scene.style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
+            scene.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
             
-            // BILLBOARDING: Force images to face you
-            for(let i=0; i<allItems.length; i++) {
-                const item = allItems[i];
-                item.el.style.transform = translate3d(${item.x}px, ${item.y}px, ${item.z}px) rotateY(${-ry}deg) rotateX(${-rx}deg);
+            for (var k = 0; k < allItems.length; k++) {
+                var item = allItems[k];
+                // THE KEY: Move and Un-rotate each item
+                item.el.style.transform = 'translate3d(' + item.x + 'px,' + item.y + 'px,' + item.z + 'px) rotateY(' + (-ry) + 'deg) rotateX(' + (-rx) + 'deg)';
             }
-            requestAnimationFrame(animate);
+            window.requestAnimationFrame(animate);
         }
-        
-        // Start after a tiny delay to let the browser breathe
-        setTimeout(animate, 100);
+
+        // START
+        animate();
     </script>
 </body>
 </html>
