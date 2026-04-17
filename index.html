@@ -81,4 +81,86 @@
             // Varied distance for deep effect
             var r = 350 + Math.random() * 2000; // Deep space spread
             var p = Math.random() * 6.28, th = Math.random() * 3.14;
-            var x = r * Math.sin(th) * Math.cos(p), y = r * Math.sin(th) * Math.sin(p), z =
+            var x = r * Math.sin(th) * Math.cos(p), y = r * Math.sin(th) * Math.sin(p), z = r * Math.cos(th);// Varied size and brightness for depth
+            var size = (Math.random() * 2.5 + 1);
+            s.style.width = s.style.height = size + 'px';
+            s.style.opacity = (Math.random() * 0.6 + 0.3); // Twinkling range
+            if (size > 2) { s.style.boxShadow = "0 0 5px white"; } // Bright stars glow
+
+            scene.appendChild(s);
+            allItems.push({ el: s, x: x, y: y, z: z });
+        }
+
+        // 3. PHOTOS (No changes here)
+        for (var j = 1; j <= 172; j++) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            var r2 = 400 + Math.random() * 1000; // Random spread
+            var p2 = Math.random() * 6.28, th2 = Math.random() * 3.14;
+            var x2 = r2 * Math.sin(th2) * Math.cos(p2), y2 = r2 * Math.sin(th2) * Math.sin(p2), z2 = r2 * Math.cos(th2);
+            card.innerHTML = '<img src="1 (' + j + ').jpg" onerror="this.src=\'1(\'+j+\').jpg\';this.onerror=function(){this.parentElement.remove();}">';
+            scene.appendChild(card);
+            allItems.push({ el: card, x: x2, y: y2, z: z2 });
+        }
+
+        // --- INTERACTION ---
+        window.onwheel = function(e) { zoom -= e.deltaY * 1.5; updateZoom(); };
+
+        window.ontouchstart = function(e) {
+            if (e.touches.length === 2) {
+                lastDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+            } else {
+                isDragging = true;
+                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+            }
+        };
+
+        window.ontouchmove = function(e) {
+            if (e.touches.length === 2) {
+                var dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                zoom += (dist - lastDist) * 3.5; // Zoom sensitive
+                lastDist = dist;
+                updateZoom();
+            } else if (isDragging) {
+                ry += (e.touches[0].clientX - lastX) * 0.35;
+                rx -= (e.touches[0].clientY - lastY) * 0.35;
+                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+            }
+        };
+
+        window.onmousedown = function(e) { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmousemove = function(e) { 
+            if (isDragging) {
+                ry += (e.clientX - lastX) * 0.35;
+                rx -= (e.clientY - lastY) * 0.35;
+                lastX = e.clientX; lastY = e.clientY;
+            }
+        };
+        window.onmouseup = window.ontouchend = function() { isDragging = false; };
+
+        function updateZoom() {
+            zoom = Math.max(-3000, Math.min(1000, zoom)); 
+            zoomLayer.style.transform = 'translateZ(' + zoom + 'px)';
+        }
+
+        function animate() {
+            if (!isDragging) ry += 0.1; // Slow spin for galaxy feel
+            scene.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+            
+            var invRy = -ry;
+            var invRx = -rx;
+
+            for (var n = 0; n < allItems.length; n++) {
+                var it = allItems[n];
+                // Smooth GPU-accelerated billboarding
+                it.el.style.transform = 'translate3d('+it.x+'px,'+it.y+'px,'+it.z+'px) rotateY('+invRy+'deg) rotateX('+invRx+'deg)';
+            }
+            document.getElementById('msg').style.transform = 'translate(-50%, -50%) rotateY('+invRy+'deg) rotateX('+invRx+'deg)';
+            window.requestAnimationFrame(animate);
+        }
+        
+        updateZoom();
+        animate();
+    </script>
+</body>
+</html>
