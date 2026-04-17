@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kyal Sin Ko Ko Universe</title>
+    <title>Universe for Kyal Sin Ko Ko</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; color: white; font-family: sans-serif; }
@@ -13,46 +13,44 @@
             position: fixed; inset: 0; background: radial-gradient(circle at center, #2b001a 0%, #000 100%);
             display: flex; justify-content: center; align-items: center; z-index: 10000;
         }
-        .box { background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 30px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 105, 180, 0.3); text-align: center; width: 280px; box-shadow: 0 0 50px rgba(255, 20, 147, 0.2); }
-        h1 { font-family: 'Pacifico', cursive; font-size: 2.2rem; margin-bottom: 20px; color: #ff69b4; text-shadow: 0 0 10px rgba(255,105,180,0.5); }
-        #btn { width: 100%; padding: 18px; border-radius: 50px; border: none; background: #ff1493; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4); }
+        .box { background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 30px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 105, 180, 0.3); text-align: center; width: 280px; }
+        h1 { font-family: 'Pacifico', cursive; font-size: 2.2rem; margin-bottom: 20px; color: #ff69b4; }
+        #btn { width: 100%; padding: 18px; border-radius: 50px; border: none; background: #ff1493; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
 
-        /* THE UNIVERSE VIEW */
-        #universe { display: none; width: 100%; height: 100vh; perspective: 1500px; background: radial-gradient(circle at center, #1a000d 0%, #000 100%); touch-action: none; }
-        #scaler { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        /* UNIVERSE VIEW */
+        #universe { display: none; width: 100%; height: 100vh; perspective: 1200px; background: #000; touch-action: none; }
+        #scaler { width: 100%; height: 100%; transform-style: preserve-3d; }
         #scene { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* HIGH-QUALITY HEART PLANET */
+        /* THE GLOWING PLANET */
         .planet {
-            position: absolute; width: 180px; height: 180px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ff85c1 0%, #ff1493 40%, #4b0026 80%, #000 100%);
+            position: absolute; width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff85c1, #ff1493, #000);
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 100px rgba(255, 20, 147, 0.8), inset -20px -20px 60px rgba(0,0,0,0.9);
+            box-shadow: 0 0 80px #ff1493, inset -10px -10px 40px #000;
             display: flex; justify-content: center; align-items: center; z-index: 100;
         }
-        .planet::before { content: '❤️'; font-size: 4.5rem; filter: drop-shadow(0 0 15px #fff); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .planet::after { content: '❤️'; font-size: 4rem; filter: drop-shadow(0 0 10px white); }
 
-        /* PHOTO CARDS - Alex Dev Style */
+        /* PHOTO CARDS */
         .card { 
-            position: absolute; width: 90px; height: 90px; background: #fff; 
-            padding: 4px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transform-style: preserve-3d; backface-visibility: hidden;
+            position: absolute; width: 85px; height: 85px; background: #fff; 
+            padding: 3px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            backface-visibility: hidden; opacity: 0; transition: opacity 0.5s;
         }
-        .card img { width: 100%; height: 100%; object-fit: cover; border-radius: 2px; display: block; }
+        .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        /* DECORATIONS */
-        .txt { position: absolute; font-family: 'Pacifico', cursive; color: #fff; white-space: nowrap; font-size: 1.8rem; text-shadow: 0 0 15px #ff1493, 0 0 5px #fff; pointer-events: none; }
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.6; pointer-events: none; box-shadow: 0 0 5px #fff; }
+        .txt { position: absolute; font-family: 'Pacifico', cursive; color: #fff; white-space: nowrap; font-size: 1.5rem; text-shadow: 0 0 10px #ff1493; pointer-events: none; }
+        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div id="login">
         <div class="box">
-            <h1>Universe</h1>
-            <p style="margin-bottom: 25px; font-size: 0.9rem; color: #ffc0cb;">Dedicated to the most beautiful girl</p>
-            <button id="btn" onclick="startUniverse()">ENTER ORBIT</button>
+            <h1>Welcome</h1>
+            <p style="margin-bottom: 20px;">For the most beautiful girl</p>
+            <button id="btn" onclick="start()">ENTER ORBIT</button>
         </div>
     </div>
 
@@ -65,84 +63,81 @@
     </div>
 
     <script>
-        let zoom = 1, rx = -10, ry = 0, isDragging = false, lastX, lastY, pinchDist = 0;function startUniverse() {
+        let zoom = 1, rx = -10, ry = 0, isD = false, lx, ly, pD = 0;
+
+        function start() {
             document.getElementById('login').style.display = 'none';
             document.getElementById('universe').style.display = 'block';
             
             const scene = document.getElementById('scene');
 
-            // 1. Create Star Field (Increased for quality)
-            for(let i=0; i<350; i++) {
+            // 1. Stars (Static)
+            for(let i=0; i<200; i++) {
                 let s = document.createElement('div');
                 s.className = 'star';
-                let r = 300 + Math.random()*1000;
-                let phi = Math.random()*Math.PI*2, theta = Math.random()*Math.PI;
-                let size = (Math.random()*2 + 1) + 'px';
-                s.style.width = size; s.style.height = size;
-                s.style.transform = translate3d(${r*Math.sin(theta)*Math.cos(phi)}px, ${r*Math.sin(theta)*Math.sin(phi)}px, ${r*Math.cos(theta)}px);
+                let r = 300 + Math.random()*800;
+                let ph = Math.random()*Math.PI*2, th = Math.random()*Math.PI;
+                s.style.width = s.style.height = Math.random()*3+'px';
+                s.style.transform = translate3d(${r*Math.sin(th)*Math.cos(ph)}px, ${r*Math.sin(th)*Math.sin(ph)}px, ${r*Math.cos(th)}px);
                 scene.appendChild(s);
-            }
-
-            // 2. Create Photo Cards (Matches your 1 (1).jpg filenames)
-            for(let i=1; i<=172; i++) {
-                let c = document.createElement('div');
-                c.className = 'card';
-                let angle = (i/172) * Math.PI * 2;
-                let radius = 450 + (Math.random() * 150); // Wider orbit
-                let y = (Math.random() - 0.5) * 700;
-                
-                c.style.transform = translate3d(${Math.cos(angle)*radius}px, ${y}px, ${Math.sin(angle)*radius}px) rotateY(${-angle}rad);
-                
-                // We use both name formats you have in GitHub just in case
-                c.innerHTML = <img src="1 (${i}).jpg" loading="lazy" onerror="this.src='1(${i}).jpg'; this.onerror=function(){this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'}">;
-                scene.appendChild(c);
-            }
-
-            // 3. Floating Text Rings
-            for(let t=0; t<12; t++) {
+            }// 2. Love Text Rings
+            for(let t=0; t<8; t++) {
                 let txt = document.createElement('div');
                 txt.className = 'txt';
                 txt.innerText = "I love Kyal Sin Ko Ko";
-                let angle = (t/12) * Math.PI * 2;
-                txt.style.transform = translate3d(${Math.cos(angle)*600}px, ${(t-6)*70}px, ${Math.sin(angle)*600}px) rotateY(${-angle}rad);
+                let a = (t/8)*Math.PI*2;
+                txt.style.transform = translate3d(${Math.cos(a)*500}px, ${(t-4)*70}px, ${Math.sin(a)*500}px) rotateY(${-a}rad);
                 scene.appendChild(txt);
             }
 
-            initControls();
-            update();
+            // 3. Spawning Photos (One by One to prevent lag)
+            let i = 1;
+            function spawnCard() {
+                if(i > 172) return;
+                let c = document.createElement('div');
+                c.className = 'card';
+                let a = Math.random() * Math.PI * 2;
+                let r = 350 + Math.random() * 200;
+                let y = (Math.random() - 0.5) * 600;
+                c.style.transform = translate3d(${Math.cos(a)*r}px, ${y}px, ${Math.sin(a)*r}px) rotateY(${-a}rad);
+                
+                // Matches your filename format: 1 (1).jpg
+                c.innerHTML = <img src="1 (${i}).jpg" onerror="this.parentElement.style.display='none'">;
+                scene.appendChild(c);
+                
+                setTimeout(() => { c.style.opacity = "1"; }, 50);
+                i++;
+                setTimeout(spawnCard, 30); // Spawns next photo every 30ms
+            }
+            spawnCard();
+
+            init();
+            loop();
         }
 
-        function initControls() {
-            // Touch for Mobile
+        function init() {
             window.ontouchstart = e => {
-                if(e.touches.length === 2) {
-                    pinchDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                } else {
-                    isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-                }
+                if(e.touches.length === 2) pD = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                else { isD = true; lx = e.touches[0].clientX; ly = e.touches[0].clientY; }
             };
             window.ontouchmove = e => {
                 if(e.touches.length === 2) {
                     let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                    zoom *= (d/pinchDist); zoom = Math.max(0.2, Math.min(zoom, 3)); pinchDist = d;
-                } else if(isDragging) {
-                    ry += (e.touches[0].clientX - lastX) * 0.4;
-                    rx -= (e.touches[0].clientY - lastY) * 0.4;
-                    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                    zoom *= (d/pD); zoom = Math.max(0.3, Math.min(zoom, 3)); pD = d;
+                } else if(isD) {
+                    ry += (e.touches[0].clientX - lx)*0.5; rx -= (e.touches[0].clientY - ly)*0.5;
+                    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
                 }
             };
-            window.ontouchend = () => isDragging = false;
+            window.ontouchend = () => isD = false;
+            window.onwheel = e => { zoom -= e.deltaY * 0.001; zoom = Math.max(0.3, Math.min(zoom, 3)); };
+        }
 
-            // Mouse for Desktop
-            window.onmousedown = e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
-            window.onmousemove = e => { if(isDragging) { ry += (e.clientX - lastX)*0.4; rx -= (e.clientY - lastY)*0.4; lastX = e.clientX; lastY = e.clientY; }};
-            window.onmouseup = () => isDragging = false;
-            window.onwheel = e => { zoom -= e.deltaY * 0.001; zoom = Math.max(0.2, Math.min(zoom, 3)); };
-        }function update() {
-            if(!isDragging) ry += 0.15; // Smooth auto-rotation
+        function loop() {
+            if(!isD) ry += 0.15;
             document.getElementById('scene').style.transform = rotateX(${rx}deg) rotateY(${ry}deg);
             document.getElementById('scaler').style.transform = scale(${zoom});
-            requestAnimationFrame(update);
+            requestAnimationFrame(loop);
         }
     </script>
 </body>
