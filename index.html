@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Universe for Kyal Sin Ko Ko</title>
+    <title>Universe</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; touch-action: none; color: white; font-family: sans-serif; }
         
-        /* LOGIN SCREEN FROM YOUR SCREENSHOT */
+        /* LOGIN SCREEN - MATCHES YOUR SCREENSHOT */
         #login-screen {
             position: fixed; inset: 0; background: radial-gradient(circle, #2b001a, #000);
             display: flex; justify-content: center; align-items: center; z-index: 10000;
@@ -16,43 +16,45 @@
         .login-box {
             background: rgba(255, 255, 255, 0.07); padding: 35px; border-radius: 25px;
             backdrop-filter: blur(20px); border: 1px solid rgba(255, 105, 180, 0.3);
-            text-align: center; width: 300px; box-shadow: 0 0 50px rgba(255, 20, 147, 0.3);
+            text-align: center; width: 280px; box-shadow: 0 0 50px rgba(255, 20, 147, 0.3);
         }
-        .login-box h1 { font-family: 'Pacifico', cursive; font-size: 2.2rem; margin: 0 0 10px 0; }
-        .login-box p { font-size: 0.9rem; opacity: 0.8; margin-bottom: 25px; }
-        input { width: 90%; padding: 14px; border-radius: 25px; border: none; margin-bottom: 20px; text-align: center; font-size: 1rem; color: #333; outline: none; }
+        h1 { font-family: 'Pacifico', cursive; font-size: 2rem; margin: 0 0 10px 0; }
+        p { font-size: 0.85rem; opacity: 0.8; margin-bottom: 25px; line-height: 1.4; }
+        input { width: 90%; padding: 14px; border-radius: 25px; border: none; margin-bottom: 20px; text-align: center; font-size: 1rem; color: #000; }
         button { width: 100%; padding: 14px; border-radius: 25px; border: none; background: #ff1493; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
 
         /* THE GALAXY SCENE */
-        #camera-mount { display: none; width: 100%; height: 100vh; perspective: 1200px; background: #000; }
-        #zoom-layer { width: 100%; height: 100%; transform-style: preserve-3d; }
-        #scene-root { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
+        #main-view { display: none; width: 100%; height: 100vh; perspective: 1000px; background: #000; }
+        #zoom-container { width: 100%; height: 100%; transform-style: preserve-3d; }
+        #galaxy-root { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
-        /* PRETTY PLANET WITH HEART */
-        .planet {
+        /* THE PLANET */
+        .planet-core {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 150px; height: 150px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #ff69b4, #ff1493, #000);
             box-shadow: 0 0 60px #ff1493, inset -20px -20px 50px rgba(0,0,0,0.8);
             z-index: 10; display: flex; justify-content: center; align-items: center;
         }
-        .planet::after { content: '❤️'; font-size: 4rem; filter: drop-shadow(0 0 10px white); }
+        .planet-core::after { content: '❤️'; font-size: 4rem; }
 
-        .photo-card {
+        /* PHOTO CARDS */
+        .card {
             position: absolute; width: 80px; height: 80px;
             background: #fff; border: 2px solid #fff; border-radius: 5px;
             overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             backface-visibility: hidden;
         }
-        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
 
-        .orbit-text {
+        /* MULTIPLE TEXT LINES */
+        .love-text {
             position: absolute; font-family: 'Pacifico', cursive; color: #fff;
-            white-space: nowrap; font-size: 1.8rem; pointer-events: none;
+            white-space: nowrap; font-size: 1.6rem; pointer-events: none;
             text-shadow: 0 0 15px #ff1493;
         }
 
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.6; pointer-events: none; }
+        .star-dust { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -61,121 +63,117 @@
         <div class="login-box">
             <h1>Welcome</h1>
             <p>Enter the name of the most beautiful woman</p>
-            <input type="text" id="username" placeholder="Full Name..." autocomplete="off">
-            <button onclick="checkLogin()">Enter Orbit</button>
+            <input type="text" id="name-input" placeholder="Full Name..." autocomplete="off">
+            <button onclick="unlockUniverse()">Enter Orbit</button>
         </div>
     </div>
 
-    <div id="camera-mount">
-        <div id="zoom-layer">
-            <div class="planet"></div>
-            <div id="scene-root"></div>
+    <div id="main-view">
+        <div id="zoom-container">
+            <div class="planet-core"></div>
+            <div id="galaxy-root"></div>
         </div>
     </div>
 
     <script>
-        let currentZoom = 1;
-        let rotY = 0, rotX = -10;
-        let isDown = false, lx, ly, startDist = 0;function checkLogin() {
-            const inputName = document.getElementById('username').value.trim();
-            if(inputName === "Kyal Sin Ko Ko") {
+        let zoom = 1;
+        let rX = -10, rY = 0;
+        let isDown = false, lastX, lastY, distStart = 0;function unlockUniverse() {
+            const name = document.getElementById('name-input').value.trim();
+            // Case-sensitive check to match your requirement
+            if(name === "Kyal Sin Ko Ko") {
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('camera-mount').style.display = 'block';
-                startGalaxy();
+                document.getElementById('main-view').style.display = 'block';
+                setupGalaxy();
             } else {
-                alert("Incorrect Name. Make sure it's exactly: Kyal Sin Ko Ko");
+                alert("Incorrect Name. Please try again.");
             }
         }
 
-        function startGalaxy() {
-            const root = document.getElementById('scene-root');
+        function setupGalaxy() {
+            const root = document.getElementById('galaxy-root');
             
-            // 1. Stars Particles
-            for(let i=0; i<300; i++) {
+            // 1. Create Star Field
+            for(let i=0; i<250; i++) {
                 let s = document.createElement('div');
-                s.className = 'star';
+                s.className = 'star-dust';
                 let r = 200 + Math.random() * 800;
                 let theta = Math.random() * Math.PI * 2;
                 let phi = Math.random() * Math.PI;
-                let sz = Math.random() * 3 + 'px';
-                s.style.width = sz; s.style.height = sz;
+                let size = (Math.random() * 2 + 1) + 'px';
+                s.style.width = size; s.style.height = size;
                 s.style.transform = translate3d(${r*Math.sin(phi)*Math.cos(theta)}px, ${r*Math.sin(phi)*Math.sin(theta)}px, ${r*Math.cos(phi)}px);
                 root.appendChild(s);
             }
 
-            // 2. 172 Images from Root Folder
+            // 2. Create 172 Images from your root folder
             for (let i = 1; i <= 172; i++) {
                 let card = document.createElement('div');
-                card.className = 'photo-card';
+                card.className = 'card';
                 let angle = (i / 172) * Math.PI * 2;
-                let r = 380 + (Math.random() * 120);
+                let r = 380 + (Math.random() * 100);
                 let x = Math.cos(angle) * r;
                 let z = Math.sin(angle) * r;
-                let y = (Math.random() - 0.5) * 600;
+                let y = (Math.random() - 0.5) * 550;
 
                 card.style.transform = translate3d(${x}px, ${y}px, ${z}px) rotateY(${-angle}rad);
+                // Corrected path for your GitHub files
                 card.innerHTML = <img src="1 (${i}).jpg" onerror="this.src='https://via.placeholder.com/100/ff1493/ffffff?text=❤️'">;
                 root.appendChild(card);
             }
 
-            // 3. Orbiting Texts
-            for(let t=0; t<10; t++) {
+            // 3. Create 12 Text Lines
+            for(let t=0; t<12; t++) {
                 let txt = document.createElement('div');
-                txt.className = 'orbit-text';
+                txt.className = 'love-text';
                 txt.innerText = "I love Kyal Sin Ko Ko";
-                let angle = (t / 10) * Math.PI * 2;
+                let angle = (t / 12) * Math.PI * 2;
                 let r = 500;
-                txt.style.transform = translate3d(${Math.cos(angle)*r}px, ${(t-5)*60}px, ${Math.sin(angle)*r}px) rotateY(${-angle}rad);
+                txt.style.transform = translate3d(${Math.cos(angle)*r}px, ${(t-6)*60}px, ${Math.sin(angle)*r}px) rotateY(${-angle}rad);
                 root.appendChild(txt);
             }
 
-            setupControls();
-            animate();
+            initControls();
+            loop();
         }
 
-        function setupControls() {
-            window.onwheel = e => {
-                currentZoom -= e.deltaY * 0.001;
-                currentZoom = Math.min(Math.max(0.3, currentZoom), 3);
+        function initControls() {
+            // Mouse/Touch Drag
+            const start = (x, y) => { isDown = true; lastX = x; lastY = y; };
+            const move = (x, y) => {
+                if(!isDown) return;
+                rY += (x - lastX) * 0.5;
+                rX -= (y - lastY) * 0.5;
+                lastX = x; lastY = y;
             };
+
+            window.onmousedown = e => start(e.clientX, e.clientY);
+            window.onmousemove = e => move(e.clientX, e.clientY);
+            window.onmouseup = () => isDown = false;
 
             window.ontouchstart = e => {
-                isDown = true;
                 if(e.touches.length === 2) {
-                    startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                    distStart = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 } else {
-                    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+                    start(e.touches[0].clientX, e.touches[0].clientY);
                 }
             };
-
             window.ontouchmove = e => {
-                if(!isDown) return;
                 if(e.touches.length === 2) {
-                    let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                    currentZoom *= (dist / startDist);
-                    currentZoom = Math.min(Math.max(0.3, currentZoom), 3);
-                    startDist = dist;
+                    let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                    zoom *= (d / distStart);
+                    zoom = Math.max(0.3, Math.min(zoom, 3));
+                    distStart = d;
                 } else {
-                    rotY += (e.touches[0].clientX - lx) * 0.5;
-                    rotX -= (e.touches[0].clientY - ly) * 0.5;
-                    lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+                    move(e.touches[0].clientX, e.touches[0].clientY);
                 }
             };
-
-            window.onmousedown = e => { isDown = true; lx = e.clientX; ly = e.clientY; };window.onmousemove = e => {
-                if(!isDown) return;
-                rotY += (e.clientX - lx) * 0.5;
-                rotX -= (e.clientY - ly) * 0.5;
-                lx = e.clientX; ly = e.clientY;
-            };
-            window.onmouseup = window.ontouchend = () => isDown = false;
-        }
-
-        function animate() {
-            if(!isDown) rotY += 0.12; 
-            document.getElementById('scene-root').style.transform = rotateX(${rotX}deg) rotateY(${rotY}deg);
-            document.getElementById('zoom-layer').style.transform = scale(${currentZoom});
-            requestAnimationFrame(animate);
+            window.ontouchend = () => isDown = false;
+        }function loop() {
+            if(!isDown) rY += 0.1; // Slow drift
+            document.getElementById('galaxy-root').style.transform = rotateX(${rX}deg) rotateY(${rY}deg);
+            document.getElementById('zoom-container').style.transform = scale(${zoom});
+            requestAnimationFrame(loop);
         }
     </script>
 </body>
